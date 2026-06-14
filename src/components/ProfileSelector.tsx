@@ -362,6 +362,7 @@ export function ProfileForm({ existing, userId, profileId, onSave, onCancel }: P
   const [youtube, setYoutube] = useState(existing?.social_youtube ?? '');
   const [socialX, setSocialX] = useState(existing?.social_x ?? '');
   const [facebook, setFacebook] = useState(existing?.social_facebook ?? '');
+  const [imdb, setImdb] = useState((existing as any)?.social_imdb ?? '');
   const [pubInstagram, setPubInstagram] = useState((existing as any)?.public_social_instagram ?? false);
   const [pubTiktok, setPubTiktok] = useState((existing as any)?.public_social_tiktok ?? false);
   const [pubYoutube, setPubYoutube] = useState((existing as any)?.public_social_youtube ?? true);
@@ -415,6 +416,7 @@ export function ProfileForm({ existing, userId, profileId, onSave, onCancel }: P
       social_youtube: youtube.trim(),
       social_x: socialX.trim(),
       social_facebook: facebook.trim(),
+      social_imdb: imdb.trim(),
       preferred_genres: genres,
       notify_new_films: notifyNewFilms,
       public_bio: pubBio,
@@ -765,6 +767,22 @@ export function ProfileForm({ existing, userId, profileId, onSave, onCancel }: P
               className="w-full px-4 py-3 bg-[#0a0a0a] border border-white/10 rounded-xl text-white placeholder-neutral-600 focus:outline-none focus:border-[#e8a020]/60 focus:ring-2 focus:ring-[#e8a020]/20 transition-all text-sm"
             />
           </div>
+
+          {/* IMDB */}
+          <div>
+            <label className="block text-sm font-medium text-neutral-400 mb-1.5 flex items-center gap-2">
+              <span className="px-1.5 py-0.5 bg-[#F5C518] text-black text-xs font-black rounded">IMDb</span>
+              IMDb Profile
+            </label>
+            <input
+              type="text"
+              value={imdb}
+              onChange={e => setImdb(e.target.value)}
+              placeholder="https://www.imdb.com/name/nm0000001/"
+              className="w-full px-4 py-3 bg-[#0a0a0a] border border-white/10 rounded-xl text-white placeholder-neutral-600 focus:outline-none focus:border-[#e8a020]/60 focus:ring-2 focus:ring-[#e8a020]/20 transition-all text-sm"
+            />
+            <p className="text-xs text-neutral-600 mt-1">Always shown publicly on your profile.</p>
+          </div>
         </div>
       )}
 
@@ -912,6 +930,7 @@ export default function ProfileSelector({ onComplete }: ProfileSelectorProps) {
       social_youtube: data.social_youtube ?? '',
       social_x: data.social_x ?? '',
       social_facebook: data.social_facebook ?? '',
+      social_imdb: (data as any).social_imdb ?? '',
       preferred_genres: data.preferred_genres ?? [],
       notify_new_films: data.notify_new_films ?? false,
       public_bio: (data as any).public_bio ?? true,
@@ -960,6 +979,7 @@ export default function ProfileSelector({ onComplete }: ProfileSelectorProps) {
         social_youtube: data.social_youtube ?? '',
         social_x: data.social_x ?? '',
         social_facebook: data.social_facebook ?? '',
+      social_imdb: (data as any).social_imdb ?? '',
         preferred_genres: data.preferred_genres ?? [],
         notify_new_films: data.notify_new_films ?? false,
       });

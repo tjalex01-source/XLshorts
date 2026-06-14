@@ -5,7 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import type { Film, Series } from '../types/database';
 import {
   Play, Plus, Check, Star, Clock, Calendar, User as UserIcon,
-  Loader2, ChevronLeft, Share2, Facebook, Twitter, MessageCircle,
+  Loader2, ChevronLeft, Share2, Facebook, Twitter, MessageCircle, Instagram,
   Users, Globe, Award, Film as FilmIcon, X, ChevronRight, Layers
 } from 'lucide-react';
 import { formatDuration } from '../lib/utils';
@@ -34,6 +34,23 @@ function shareToTwitter(film: Film, rating?: number) {
 function shareToWhatsApp(film: Film, rating?: number) {
   const { text } = buildShareUrl(film, rating);
   window.open(`https://wa.me/?text=${text}`, '_blank');
+}
+
+function shareToTikTok(film: Film) {
+  const { url } = buildShareUrl(film);
+  window.open(`https://www.tiktok.com/share?url=${encodeURIComponent(url)}`, '_blank');
+}
+
+function shareToLinkedIn(film: Film) {
+  const { url } = buildShareUrl(film);
+  window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`, '_blank', 'width=600,height=400');
+}
+
+function copyAndAlertInstagram(film: Film) {
+  const { url } = buildShareUrl(film);
+  navigator.clipboard.writeText(url).then(() => {
+    alert('Link copied! Paste it into your Instagram story or bio.');
+  });
 }
 
 async function shareNative(film: Film, rating?: number) {
@@ -132,37 +149,37 @@ function ShareStrip({ film, rating }: { film: Film; rating?: number }) {
   const hasNativeShare = typeof navigator !== 'undefined' && !!navigator.share;
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-2 flex-wrap">
       <span className="text-xs text-neutral-500 mr-1 flex items-center gap-1.5">
         <Share2 size={13} /> Share
       </span>
-      <button
-        onClick={() => shareToFacebook(film, rating)}
-        title="Share on Facebook"
-        className="w-8 h-8 flex items-center justify-center rounded-full bg-[#1877F2]/15 hover:bg-[#1877F2]/30 text-[#1877F2] transition-all"
-      >
+      <button onClick={() => shareToFacebook(film, rating)} title="Share on Facebook"
+        className="w-8 h-8 flex items-center justify-center rounded-full bg-[#1877F2]/15 hover:bg-[#1877F2]/30 text-[#1877F2] transition-all">
         <Facebook size={15} />
       </button>
-      <button
-        onClick={() => shareToTwitter(film, rating)}
-        title="Share on X / Twitter"
-        className="w-8 h-8 flex items-center justify-center rounded-full bg-white/8 hover:bg-white/15 text-white transition-all"
-      >
+      <button onClick={() => shareToTwitter(film, rating)} title="Share on X / Twitter"
+        className="w-8 h-8 flex items-center justify-center rounded-full bg-white/8 hover:bg-white/15 text-white transition-all">
         <Twitter size={15} />
       </button>
-      <button
-        onClick={() => shareToWhatsApp(film, rating)}
-        title="Share on WhatsApp"
-        className="w-8 h-8 flex items-center justify-center rounded-full bg-[#25D366]/15 hover:bg-[#25D366]/30 text-[#25D366] transition-all"
-      >
+      <button onClick={() => shareToWhatsApp(film, rating)} title="Share on WhatsApp"
+        className="w-8 h-8 flex items-center justify-center rounded-full bg-[#25D366]/15 hover:bg-[#25D366]/30 text-[#25D366] transition-all">
         <MessageCircle size={15} />
       </button>
+      <button onClick={() => shareToTikTok(film)} title="Share on TikTok"
+        className="w-8 h-8 flex items-center justify-center rounded-full bg-white/8 hover:bg-white/15 text-white transition-all text-xs font-black">
+        TT
+      </button>
+      <button onClick={() => shareToLinkedIn(film)} title="Share on LinkedIn"
+        className="w-8 h-8 flex items-center justify-center rounded-full bg-[#0A66C2]/15 hover:bg-[#0A66C2]/30 text-[#0A66C2] transition-all text-xs font-black">
+        in
+      </button>
+      <button onClick={() => copyAndAlertInstagram(film)} title="Copy link for Instagram"
+        className="w-8 h-8 flex items-center justify-center rounded-full bg-[#E1306C]/15 hover:bg-[#E1306C]/30 text-[#E1306C] transition-all">
+        <Instagram size={15} />
+      </button>
       {hasNativeShare && (
-        <button
-          onClick={() => shareNative(film, rating)}
-          title="More sharing options"
-          className="w-8 h-8 flex items-center justify-center rounded-full bg-white/8 hover:bg-white/15 text-neutral-300 transition-all"
-        >
+        <button onClick={() => shareNative(film, rating)} title="More sharing options"
+          className="w-8 h-8 flex items-center justify-center rounded-full bg-white/8 hover:bg-white/15 text-neutral-300 transition-all">
           <Share2 size={14} />
         </button>
       )}
@@ -544,10 +561,14 @@ export default function FilmDetail() {
               )}
               {credits.filter((c: any) => c.role === 'actor').length === 0 && film.cast_members?.length > 0 && (
                 <div className="sm:col-span-2">
-                  <p className="text-xs text-neutral-500 uppercase tracking-wider mb-1 flex items-center gap-1.5">
+                  <p className="text-xs text-neutral-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
                     <Users size={12} /> Cast
                   </p>
-                  <p className="text-white font-medium">{film.cast_members.join(', ')}</p>
+                  <div className="flex flex-wrap gap-2">
+                    {(film.cast_members as string[]).map((name: string) => (
+                      <span key={name} className="px-3 py-1.5 bg-white/5 border border-white/8 rounded-lg text-sm text-neutral-300">{name}</span>
+                    ))}
+                  </div>
                 </div>
               )}
               {film.awards && (

@@ -16,6 +16,7 @@ interface PersonProfile {
   social_x: string | null;
   social_tiktok: string | null;
   website: string | null;
+  social_imdb: string | null;
   preferred_genres: string[];
   public_bio: boolean;
   public_avatar: boolean;
@@ -150,6 +151,13 @@ export default function PersonPage() {
                 <a href={person.website} target="_blank" rel="noopener noreferrer"
                   className="flex items-center gap-1.5 text-sm text-neutral-400 hover:text-white transition-colors">
                   <Globe size={14} /> Website
+                </a>
+              )}
+              {person.social_imdb && (
+                <a href={person.social_imdb} target="_blank" rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 text-sm text-neutral-400 hover:text-[#F5C518] transition-colors">
+                  <span className="px-1 py-0.5 bg-[#F5C518] text-black text-xs font-black rounded leading-none">IMDb</span>
+                  IMDb
                 </a>
               )}
               {person.public_social_instagram && person.social_instagram && (
