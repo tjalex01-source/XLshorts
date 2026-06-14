@@ -62,6 +62,7 @@ export default function Home() {
   const [recommended, setRecommended] = useState<Film[]>([]);
   const [seriesList, setSeriesList] = useState<Series[]>([]);
   const [continueWatching, setContinueWatching] = useState<Film[]>([]);
+  const [watchAgain, setWatchAgain] = useState<Film[]>([]);
   const [watchlistFilms, setWatchlistFilms] = useState<Film[]>([]);
   const [watchlistIds, setWatchlistIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
@@ -162,16 +163,19 @@ export default function Home() {
       if (user) {
         const wlQuery = supabase.from('watchlist').select('film_id').eq('user_id', user.id);
         const histQuery = supabase.from('watch_history').select('film_id, progress_seconds, watched_at').eq('user_id', user.id).eq('completed', false).order('watched_at', { ascending: false }).limit(20);
+        const watchedQuery = supabase.from('watch_history').select('film_id, watched_at').eq('user_id', user.id).eq('completed', true).order('watched_at', { ascending: false }).limit(20);
 
-        const [wlRes, histRes] = await Promise.all([
+        const [wlRes, histRes, watchedRes] = await Promise.all([
           profileId ? wlQuery.eq('profile_id', profileId) : wlQuery.is('profile_id', null),
           profileId ? histQuery.eq('profile_id', profileId) : histQuery.is('profile_id', null),
+          profileId ? watchedQuery.eq('profile_id', profileId) : watchedQuery.is('profile_id', null),
         ]);
 
         const ids = new Set((wlRes.data ?? []).map(w => w.film_id));
         setWatchlistIds(ids);
         setWatchlistFilms((wlRes.data ?? []).map(w => filmMap.get(w.film_id)!).filter(Boolean));
         setContinueWatching((histRes.data ?? []).map(h => filmMap.get(h.film_id)!).filter(Boolean));
+        setWatchAgain((watchedRes.data ?? []).map(h => filmMap.get(h.film_id)!).filter(Boolean));
       }
     } finally {
       setLoading(false);
@@ -211,6 +215,9 @@ export default function Home() {
         )}
         {user && watchlistFilms.length > 0 && (
           <FilmRow title="My List" films={watchlistFilms} watchlistIds={watchlistIds} onToggleWatchlist={toggleWatchlist} />
+        )}
+        {user && watchAgain.length > 0 && (
+          <FilmRow title="Watch Again" films={watchAgain} watchlistIds={watchlistIds} onToggleWatchlist={toggleWatchlist} />
         )}
         {recommended.length > 0 && (
           <FilmRow title="Recommended for You" films={recommended} watchlistIds={watchlistIds} onToggleWatchlist={toggleWatchlist} />
