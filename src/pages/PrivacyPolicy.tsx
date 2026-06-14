@@ -1,315 +1,137 @@
 import { ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <section className="space-y-3">
+      <h2 className="text-xl font-bold text-white">{title}</h2>
+      <div className="text-neutral-400 leading-relaxed space-y-3">{children}</div>
+    </section>
+  );
+}
+
 export default function PrivacyPolicy() {
   return (
     <div className="min-h-screen bg-[#0a0a0a]">
-      {/* Header */}
       <div className="sticky top-0 z-10 bg-[#0a0a0a]/95 backdrop-blur border-b border-white/5">
         <div className="max-w-4xl mx-auto px-4 py-4 sm:px-6 lg:px-8">
-          <Link
-            to="/"
-            className="inline-flex items-center gap-2 text-neutral-400 hover:text-white transition-colors"
-          >
+          <Link to="/" className="inline-flex items-center gap-2 text-neutral-400 hover:text-white transition-colors">
             <ArrowLeft size={18} />
             <span className="text-sm font-medium">Back</span>
           </Link>
         </div>
       </div>
 
-      {/* Content */}
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="space-y-8">
-          {/* Title */}
+        <div className="space-y-10">
+
           <div>
             <h1 className="text-4xl font-black text-white mb-2">
               Privacy <span className="text-[#e8a020]">Policy</span>
             </h1>
             <p className="text-neutral-500 text-sm">Last Updated: June 2026</p>
-          </div>
-
-          {/* Introduction */}
-          <div className="bg-[#141414] border border-white/8 rounded-2xl p-6 sm:p-8">
-            <p className="text-neutral-300 leading-relaxed">
-              Xandland Enterprises, LLC ("we," "us," or "our") operates the XLShorts platform. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website and use our services. Please read this Privacy Policy carefully. If you do not agree with our policies and practices, please do not use our service.
+            <p className="text-neutral-500 text-sm mt-1">
+              XLShorts is a service of <span className="text-neutral-300">Xandland Enterprises, LLC</span>, a Texas limited liability company.
             </p>
           </div>
 
-          {/* Sections */}
-          <div className="space-y-6">
-            {/* 1. What Data We Collect */}
-            <section className="space-y-3">
-              <h2 className="text-2xl font-bold text-white flex items-start gap-3">
-                <span className="text-[#e8a020] font-black">1.</span>
-                <span>What Data We Collect</span>
-              </h2>
-              <div className="ml-9 space-y-4">
-                <div>
-                  <h3 className="text-lg font-semibold text-white mb-2">Information You Provide</h3>
-                  <ul className="space-y-2 text-neutral-300">
-                    <li className="flex gap-3">
-                      <span className="text-[#e8a020]">•</span>
-                      <span><strong className="text-white">Account Information:</strong> Email address, full name, password (hashed)</span>
-                    </li>
-                    <li className="flex gap-3">
-                      <span className="text-[#e8a020]">•</span>
-                      <span><strong className="text-white">Creator Information:</strong> For creators, payment/payout details for revenue distribution</span>
-                    </li>
-                    <li className="flex gap-3">
-                      <span className="text-[#e8a020]">•</span>
-                      <span><strong className="text-white">Communication:</strong> Messages sent to support or feedback submitted via the platform</span>
-                    </li>
-                  </ul>
-                </div>
+          <Section title="1. Overview">
+            <p>Xandland Enterprises, LLC ("Xandland," "we," "us," or "our") operates XLShorts and is committed to protecting your privacy. This Privacy Policy explains what information we collect, how we use it, and the choices you have regarding your information when you use XLShorts ("the Platform").</p>
+            <p>By using the Platform, you consent to the practices described in this Privacy Policy.</p>
+          </Section>
 
-                <div>
-                  <h3 className="text-lg font-semibold text-white mb-2">Information Automatically Collected</h3>
-                  <ul className="space-y-2 text-neutral-300">
-                    <li className="flex gap-3">
-                      <span className="text-[#e8a020]">•</span>
-                      <span><strong className="text-white">Device & Browser Information:</strong> IP address, browser type, operating system, device identifiers</span>
-                    </li>
-                    <li className="flex gap-3">
-                      <span className="text-[#e8a020]">•</span>
-                      <span><strong className="text-white">Watch History:</strong> Films viewed, playback duration, timestamps</span>
-                    </li>
-                    <li className="flex gap-3">
-                      <span className="text-[#e8a020]">•</span>
-                      <span><strong className="text-white">Interaction Data:</strong> Searches, content preferences, clicks, engagement metrics</span>
-                    </li>
-                    <li className="flex gap-3">
-                      <span className="text-[#e8a020]">•</span>
-                      <span><strong className="text-white">Cookies & Tracking:</strong> Session cookies, analytics pixels, ad tracking identifiers</span>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </section>
+          <Section title="2. Information We Collect">
+            <p><span className="text-white font-semibold">Account Information:</span> When you create an account, we collect your email address and display name. If you choose to complete your profile, we may also collect a bio, profile photo, social media links, and genre preferences.</p>
+            <p><span className="text-white font-semibold">Viewer Profiles:</span> XLShorts supports multiple viewer profiles under a single account. We store profile names, avatar selections, content preferences, age tier settings, content restriction flags, and optional PIN hashes for profile switching.</p>
+            <p><span className="text-white font-semibold">Watch Activity:</span> We collect information about your viewing activity, including which films you watch, your progress within films, whether you complete films, and films you add to your watchlist. This information is used to power features like Continue Watching, Watch Again, and personalized recommendations.</p>
+            <p><span className="text-white font-semibold">Creator Content:</span> If you submit Content as a creator, we store your film's metadata, video files, thumbnail images, content labels, and any credits you associate with your Content.</p>
+            <p><span className="text-white font-semibold">Usage Data:</span> We may collect standard usage data such as browser type, device type, IP address, pages visited, and time spent on the Platform. This data is used to improve the Platform and diagnose technical issues.</p>
+            <p><span className="text-white font-semibold">Advertising Data:</span> If you interact with ads served through third-party networks such as Google AdSense, those providers may collect data in accordance with their own privacy policies. We do not control the data practices of third-party advertising networks.</p>
+          </Section>
 
-            {/* 2. How We Use Your Data */}
-            <section className="space-y-3">
-              <h2 className="text-2xl font-bold text-white flex items-start gap-3">
-                <span className="text-[#e8a020] font-black">2.</span>
-                <span>How We Use Your Data</span>
-              </h2>
-              <p className="text-neutral-300 leading-relaxed ml-9 mb-3">We use the information we collect for the following purposes:</p>
-              <ul className="ml-9 space-y-2 text-neutral-300">
-                <li className="flex gap-3">
-                  <span className="text-[#e8a020]">•</span>
-                  <span><strong className="text-white">Account Management:</strong> Creating and maintaining your account, authentication, password recovery</span>
-                </li>
-                <li className="flex gap-3">
-                  <span className="text-[#e8a020]">•</span>
-                  <span><strong className="text-white">Content Recommendations:</strong> Personalizing your experience with recommended films based on watch history</span>
-                </li>
-                <li className="flex gap-3">
-                  <span className="text-[#e8a020]">•</span>
-                  <span><strong className="text-white">Ad Targeting:</strong> Delivering personalized advertisements based on device, browsing behavior, and interests</span>
-                </li>
-                <li className="flex gap-3">
-                  <span className="text-[#e8a020]">•</span>
-                  <span><strong className="text-white">Platform Analytics:</strong> Understanding how users interact with XLShorts to improve our service</span>
-                </li>
-                <li className="flex gap-3">
-                  <span className="text-[#e8a020]">•</span>
-                  <span><strong className="text-white">Revenue Distribution:</strong> For creators, processing and paying out ad revenue shares</span>
-                </li>
-                <li className="flex gap-3">
-                  <span className="text-[#e8a020]">•</span>
-                  <span><strong className="text-white">Customer Support:</strong> Responding to inquiries and resolving issues</span>
-                </li>
-                <li className="flex gap-3">
-                  <span className="text-[#e8a020]">•</span>
-                  <span><strong className="text-white">Legal Compliance:</strong> Fulfilling legal obligations and enforcing our Terms of Service</span>
-                </li>
-              </ul>
-            </section>
+          <Section title="3. How We Use Your Information">
+            <p>We use the information we collect to:</p>
+            <ul className="list-disc pl-5 space-y-1.5">
+              <li>Provide, operate, and improve the Platform and its features.</li>
+              <li>Authenticate your identity and maintain your account and viewer profiles.</li>
+              <li>Personalize your experience, including content recommendations based on your watch history and genre preferences.</li>
+              <li>Power parental control features, including content filtering by age tier and specific content flags.</li>
+              <li>Process and display creator-submitted Content and associated credits.</li>
+              <li>Serve advertising through third-party networks and display house advertisements for Xandland Enterprises and its affiliated services.</li>
+              <li>Communicate with you about your account, content submissions, or changes to Platform policies.</li>
+              <li>Detect, investigate, and prevent fraudulent activity, policy violations, and technical issues.</li>
+            </ul>
+          </Section>
 
-            {/* 3. Data Sharing */}
-            <section className="space-y-3">
-              <h2 className="text-2xl font-bold text-white flex items-start gap-3">
-                <span className="text-[#e8a020] font-black">3.</span>
-                <span>Data Sharing & Third Parties</span>
-              </h2>
-              <div className="ml-9 space-y-3">
-                <p className="text-neutral-300 leading-relaxed">
-                  <strong className="text-white">We do not sell personal data to third parties.</strong> However, we share information in the following limited circumstances:
-                </p>
-                <ul className="space-y-2 text-neutral-300">
-                  <li className="flex gap-3">
-                    <span className="text-[#e8a020]">•</span>
-                    <span><strong className="text-white">Ad Service Providers:</strong> We share device ID, IP address, and browsing behavior with ad partners to deliver targeted advertising. This sharing is limited to what is necessary for ad delivery.</span>
-                  </li>
-                  <li className="flex gap-3">
-                    <span className="text-[#e8a020]">•</span>
-                    <span><strong className="text-white">Payment Processors:</strong> For creators, we share payment information with third-party payment processors to facilitate revenue payouts. These processors are bound by confidentiality agreements.</span>
-                  </li>
-                  <li className="flex gap-3">
-                    <span className="text-[#e8a020]">•</span>
-                    <span><strong className="text-white">Service Providers:</strong> We may share data with hosting providers, analytics providers, and customer support platforms that assist in operating XLShorts.</span>
-                  </li>
-                  <li className="flex gap-3">
-                    <span className="text-[#e8a020]">•</span>
-                    <span><strong className="text-white">Legal Requirements:</strong> We may disclose data if required by law, court order, or government request.</span>
-                  </li>
-                </ul>
-              </div>
-            </section>
+          <Section title="4. Data Storage and Processors">
+            <p>XLShorts uses <span className="text-white font-semibold">Supabase</span> as its primary database and authentication provider. Your account data, profile information, watch history, and content metadata are stored on Supabase infrastructure. Supabase acts as a data processor on behalf of Xandland Enterprises, LLC and processes data in accordance with its own privacy and security policies.</p>
+            <p>Video and image files may be stored through cloud storage services. We take reasonable measures to ensure these providers maintain appropriate security standards.</p>
+            <p>Xandland Enterprises, LLC does not sell your personal information to third parties.</p>
+          </Section>
 
-            {/* 4. Cookies & Tracking */}
-            <section className="space-y-3">
-              <h2 className="text-2xl font-bold text-white flex items-start gap-3">
-                <span className="text-[#e8a020] font-black">4.</span>
-                <span>Cookies & Tracking Technologies</span>
-              </h2>
-              <div className="ml-9 space-y-3">
-                <p className="text-neutral-300 leading-relaxed">
-                  XLShorts uses cookies and similar tracking technologies to enhance your experience:
-                </p>
-                <ul className="space-y-2 text-neutral-300">
-                  <li className="flex gap-3">
-                    <span className="text-[#e8a020]">•</span>
-                    <span><strong className="text-white">Session Cookies:</strong> Enable login persistence and maintain your session during browsing</span>
-                  </li>
-                  <li className="flex gap-3">
-                    <span className="text-[#e8a020]">•</span>
-                    <span><strong className="text-white">Analytics Cookies:</strong> Track user behavior and platform usage patterns to improve our service</span>
-                  </li>
-                  <li className="flex gap-3">
-                    <span className="text-[#e8a020]">•</span>
-                    <span><strong className="text-white">Advertising Cookies:</strong> Used by ad partners to deliver personalized advertisements</span>
-                  </li>
-                </ul>
-                <p className="text-neutral-300 leading-relaxed mt-3">
-                  You can control cookies through your browser settings. However, disabling cookies may affect your ability to use certain features of XLShorts.
-                </p>
-              </div>
-            </section>
+          <Section title="5. Sharing Your Information">
+            <p>We do not sell, rent, or trade your personal information. We may share your information only in the following circumstances:</p>
+            <ul className="list-disc pl-5 space-y-1.5">
+              <li><span className="text-white font-semibold">Service Providers:</span> We share data with third-party service providers (such as Supabase, cloud storage, and email delivery services) that help us operate the Platform. These providers are contractually bound to protect your data and may only use it to provide services to us.</li>
+              <li><span className="text-white font-semibold">Advertising Networks:</span> Third-party advertising networks such as Google AdSense may receive usage data and device identifiers to serve relevant ads. See Section 7 for more information.</li>
+              <li><span className="text-white font-semibold">Legal Requirements:</span> We may disclose your information if required to do so by law, court order, or governmental authority, or if we believe disclosure is necessary to protect the rights, safety, or property of Xandland Enterprises, LLC, our users, or the public.</li>
+              <li><span className="text-white font-semibold">Business Transfers:</span> In the event of a merger, acquisition, or sale of assets, your information may be transferred as part of that transaction. We will notify you of any such change.</li>
+            </ul>
+          </Section>
 
-            {/* 5. Children's Privacy (COPPA) */}
-            <section className="space-y-3">
-              <h2 className="text-2xl font-bold text-white flex items-start gap-3">
-                <span className="text-[#e8a020] font-black">5.</span>
-                <span>Children's Privacy (COPPA Compliance)</span>
-              </h2>
-              <div className="ml-9 space-y-3">
-                <p className="text-neutral-300 leading-relaxed">
-                  XLShorts complies with the Children's Online Privacy Protection Act (COPPA). <strong className="text-white">We do not knowingly collect personal information from children under 13 years of age.</strong> If we become aware that we have collected data from a child under 13, we will delete that information immediately.
-                </p>
-                <p className="text-neutral-300 leading-relaxed">
-                  Parents or guardians who believe their child has provided information to XLShorts should contact us immediately at <span className="text-white">privacy@xandland.com</span>.
-                </p>
-              </div>
-            </section>
+          <Section title="6. Public Profile Information">
+            <p>XLShorts viewer profiles may include a public-facing people page accessible at <span className="text-neutral-300">xlshorts.com/people/[your-slug]</span>. The information visible on this page is controlled entirely by you through your profile's visibility settings. You may choose to make your bio, genre preferences, and social media links public or private on a per-field basis.</p>
+            <p>Your name and filmography (films you are credited on) are visible on your public profile page if you have been tagged in film credits. If you wish to be removed from a film's credits, please contact us.</p>
+          </Section>
 
-            {/* 6. Creator Data */}
-            <section className="space-y-3">
-              <h2 className="text-2xl font-bold text-white flex items-start gap-3">
-                <span className="text-[#e8a020] font-black">6.</span>
-                <span>Creator Data Collection</span>
-              </h2>
-              <p className="text-neutral-300 leading-relaxed ml-9">
-                For creators, we collect additional information necessary for revenue distribution, including:
-              </p>
-              <ul className="ml-9 space-y-2 text-neutral-300 mt-3">
-                <li className="flex gap-3">
-                  <span className="text-[#e8a020]">•</span>
-                  <span>Payment method information (bank account, PayPal, etc.)</span>
-                </li>
-                <li className="flex gap-3">
-                  <span className="text-[#e8a020]">•</span>
-                  <span>Tax information required for proper 1099 reporting (if applicable)</span>
-                </li>
-                <li className="flex gap-3">
-                  <span className="text-[#e8a020]">•</span>
-                  <span>Content upload logs and metadata</span>
-                </li>
-              </ul>
-              <p className="text-neutral-300 leading-relaxed ml-9 mt-3">
-                This information is used exclusively for calculating and distributing ad revenue and fulfilling tax obligations.
-              </p>
-            </section>
+          <Section title="7. Advertising and Third-Party Services">
+            <p>XLShorts displays advertising through third-party networks, which may include Google AdSense. These networks use cookies and similar tracking technologies to serve ads based on your browsing activity. You can opt out of personalized advertising by visiting the <a href="https://www.google.com/settings/ads" target="_blank" rel="noopener noreferrer" className="text-[#e8a020] hover:underline">Google Ads Settings</a> or the <a href="https://optout.networkadvertising.org/" target="_blank" rel="noopener noreferrer" className="text-[#e8a020] hover:underline">Network Advertising Initiative opt-out page</a>.</p>
+            <p>XLShorts and Xandland Enterprises, LLC may also display house advertisements for Xandland's own services and affiliated platforms. These house ads do not involve the sharing of your personal data with third parties.</p>
+          </Section>
 
-            {/* 7. Data Retention */}
-            <section className="space-y-3">
-              <h2 className="text-2xl font-bold text-white flex items-start gap-3">
-                <span className="text-[#e8a020] font-black">7.</span>
-                <span>Data Retention</span>
-              </h2>
-              <p className="text-neutral-300 leading-relaxed ml-9">
-                We retain personal data for as long as necessary to provide our services and fulfill the purposes outlined in this policy. When you delete your account, we delete most personal information within 30 days. However, we may retain data as required by law or for legitimate business purposes, such as fraud prevention or resolving disputes. Aggregated, anonymized data may be retained indefinitely.
-              </p>
-            </section>
+          <Section title="8. Children's Privacy">
+            <p>XLShorts is not directed at children under the age of 13. We do not knowingly collect personal information from children under 13. If you believe a child under 13 has created an account, please contact us immediately and we will take steps to remove their information.</p>
+            <p>For users between the ages of 13 and 17, we encourage parents and guardians to create supervised child profiles using the Platform's parental control features, which allow restriction of Content by age tier and specific content flags.</p>
+          </Section>
 
-            {/* 8. User Rights */}
-            <section className="space-y-3">
-              <h2 className="text-2xl font-bold text-white flex items-start gap-3">
-                <span className="text-[#e8a020] font-black">8.</span>
-                <span>Your Rights & Data Access</span>
-              </h2>
-              <div className="ml-9 space-y-3">
-                <p className="text-neutral-300 leading-relaxed">
-                  You have the right to:
-                </p>
-                <ul className="space-y-2 text-neutral-300">
-                  <li className="flex gap-3">
-                    <span className="text-[#e8a020]">•</span>
-                    <span><strong className="text-white">Access:</strong> Request a copy of the personal data we hold about you</span>
-                  </li>
-                  <li className="flex gap-3">
-                    <span className="text-[#e8a020]">•</span>
-                    <span><strong className="text-white">Deletion:</strong> Request deletion of your account and associated personal data (subject to legal requirements)</span>
-                  </li>
-                  <li className="flex gap-3">
-                    <span className="text-[#e8a020]">•</span>
-                    <span><strong className="text-white">Correction:</strong> Update or correct inaccurate information in your account</span>
-                  </li>
-                </ul>
-                <p className="text-neutral-300 leading-relaxed mt-3">
-                  To exercise any of these rights, email <span className="text-white">privacy@xandland.com</span> with your request. We will respond within 30 days of receiving your request.
-                </p>
-              </div>
-            </section>
+          <Section title="9. Data Retention">
+            <p>We retain your account information and associated data for as long as your account is active. If you delete your account, we will delete or anonymize your personal information within a reasonable timeframe, except where retention is required by law or legitimate business necessity (such as fraud prevention records).</p>
+            <p>Watch history and profile data associated with deleted profiles are removed from our active systems. Some anonymized usage data may be retained for analytics purposes.</p>
+          </Section>
 
-            {/* 9. Security */}
-            <section className="space-y-3">
-              <h2 className="text-2xl font-bold text-white flex items-start gap-3">
-                <span className="text-[#e8a020] font-black">9.</span>
-                <span>Data Security</span>
-              </h2>
-              <p className="text-neutral-300 leading-relaxed ml-9">
-                We implement reasonable technical, administrative, and physical security measures to protect your personal data from unauthorized access, disclosure, and loss. However, no method of transmission over the internet is 100% secure. We cannot guarantee absolute security. If you suspect unauthorized access to your account, please contact us immediately.
-              </p>
-            </section>
+          <Section title="10. Your Rights and Choices">
+            <p>You have the following rights regarding your personal information:</p>
+            <ul className="list-disc pl-5 space-y-1.5">
+              <li><span className="text-white font-semibold">Access and Correction:</span> You may view and update your account information and profile details at any time through your account settings.</li>
+              <li><span className="text-white font-semibold">Deletion:</span> You may request deletion of your account and associated personal data by contacting us at the address below.</li>
+              <li><span className="text-white font-semibold">Data Portability:</span> You may request a copy of the personal data we hold about you.</li>
+              <li><span className="text-white font-semibold">Opt-Out of Marketing:</span> You may unsubscribe from marketing communications at any time by following the unsubscribe link in any email we send.</li>
+            </ul>
+            <p>To exercise any of these rights, contact us at <span className="text-neutral-300">privacy@xandland.com</span>.</p>
+          </Section>
 
-            {/* 10. Contact Us */}
-            <section className="space-y-3">
-              <h2 className="text-2xl font-bold text-white flex items-start gap-3">
-                <span className="text-[#e8a020] font-black">10.</span>
-                <span>Contact & Questions</span>
-              </h2>
-              <div className="ml-9 space-y-3">
-                <p className="text-neutral-300 leading-relaxed">
-                  If you have questions, concerns, or requests regarding this Privacy Policy or our data practices, please contact us at:
-                </p>
-                <div className="bg-[#141414] border border-white/8 rounded-lg p-4 mt-3">
-                  <p className="text-white font-semibold">Xandland Enterprises, LLC</p>
-                  <p className="text-neutral-400 text-sm mt-2">Privacy: <span className="text-[#e8a020]">privacy@xandland.com</span></p>
-                  <p className="text-neutral-400 text-sm">Support: <span className="text-[#e8a020]">support@xandland.com</span></p>
-                </div>
-              </div>
-            </section>
+          <Section title="11. Security">
+            <p>We implement reasonable technical and organizational measures to protect your personal information from unauthorized access, disclosure, alteration, or destruction. These measures include encrypted data transmission, secure authentication through Supabase, and hashed storage of profile PINs.</p>
+            <p>No method of transmission over the internet or electronic storage is 100% secure. While we strive to protect your information, we cannot guarantee absolute security.</p>
+          </Section>
 
-            {/* Footer */}
-            <div className="border-t border-white/10 pt-8 mt-8">
-              <p className="text-neutral-500 text-sm mb-4">
-                This Privacy Policy is effective as of June 2026 and may be updated periodically. We will notify you of material changes via email or through the platform.
-              </p>
-              <p className="text-neutral-500 text-sm">
-                For legal inquiries, see our <Link to="/terms" className="text-[#e8a020] hover:underline">Terms of Service</Link>.
-              </p>
+          <Section title="12. Xandland Ecosystem">
+            <p>XLShorts is one of several platforms operated under the Xandland Enterprises, LLC umbrella, which includes Xandland.com, XLCoverage, XLResumes, and other services. If you use multiple Xandland services, your core account information (email, display name, and authentication) is shared across the Xandland ecosystem through a unified login system. Each service maintains its own separate data relevant to that service.</p>
+          </Section>
+
+          <Section title="13. Changes to This Policy">
+            <p>We may update this Privacy Policy from time to time. We will notify registered users of material changes by posting a notice on the Platform or by email. Your continued use of the Platform after changes are posted constitutes your acceptance of the updated policy.</p>
+          </Section>
+
+          <Section title="14. Contact Us">
+            <p>If you have questions, concerns, or requests regarding this Privacy Policy, please contact:</p>
+            <div className="text-neutral-300 space-y-1">
+              <p className="font-semibold text-white">Xandland Enterprises, LLC</p>
+              <p>privacy@xandland.com</p>
+              <p>Texas, United States</p>
             </div>
-          </div>
+          </Section>
+
         </div>
       </main>
     </div>

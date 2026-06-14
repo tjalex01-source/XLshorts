@@ -1,282 +1,136 @@
 import { ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <section className="space-y-3">
+      <h2 className="text-xl font-bold text-white">{title}</h2>
+      <div className="text-neutral-400 leading-relaxed space-y-3">{children}</div>
+    </section>
+  );
+}
+
 export default function Terms() {
   return (
     <div className="min-h-screen bg-[#0a0a0a]">
-      {/* Header */}
       <div className="sticky top-0 z-10 bg-[#0a0a0a]/95 backdrop-blur border-b border-white/5">
         <div className="max-w-4xl mx-auto px-4 py-4 sm:px-6 lg:px-8">
-          <Link
-            to="/"
-            className="inline-flex items-center gap-2 text-neutral-400 hover:text-white transition-colors"
-          >
+          <Link to="/" className="inline-flex items-center gap-2 text-neutral-400 hover:text-white transition-colors">
             <ArrowLeft size={18} />
             <span className="text-sm font-medium">Back</span>
           </Link>
         </div>
       </div>
 
-      {/* Content */}
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="space-y-8">
-          {/* Title */}
+        <div className="space-y-10">
+
           <div>
             <h1 className="text-4xl font-black text-white mb-2">
               Terms of <span className="text-[#e8a020]">Service</span>
             </h1>
             <p className="text-neutral-500 text-sm">Last Updated: June 2026</p>
-          </div>
-
-          {/* Introduction */}
-          <div className="bg-[#141414] border border-white/8 rounded-2xl p-6 sm:p-8">
-            <p className="text-neutral-300 leading-relaxed">
-              Welcome to XLShorts, operated by Xandland Enterprises, LLC. These Terms of Service ("Terms") govern your access to and use of the XLShorts platform, website, and services. By accessing or using XLShorts, you agree to be bound by these Terms. If you do not agree to all the terms and conditions, please do not use this service.
+            <p className="text-neutral-500 text-sm mt-1">
+              XLShorts is a service of <span className="text-neutral-300">Xandland Enterprises, LLC</span>, a Texas limited liability company.
             </p>
           </div>
 
-          {/* Sections */}
-          <div className="space-y-6">
-            {/* 1. Acceptance of Terms */}
-            <section className="space-y-3">
-              <h2 className="text-2xl font-bold text-white flex items-start gap-3">
-                <span className="text-[#e8a020] font-black">1.</span>
-                <span>Acceptance of Terms</span>
-              </h2>
-              <p className="text-neutral-300 leading-relaxed ml-9">
-                By creating an account or accessing XLShorts, you acknowledge that you have read, understood, and agree to be bound by these Terms, our Privacy Policy, and any other policies referenced herein. We reserve the right to modify these Terms at any time. Continued use of the platform following changes constitutes your acceptance of the updated Terms.
-              </p>
-            </section>
+          <Section title="1. Agreement to Terms">
+            <p>By accessing or using XLShorts ("the Platform"), you agree to be bound by these Terms of Service ("Terms"). If you do not agree to these Terms, do not use the Platform.</p>
+            <p>XLShorts is operated by Xandland Enterprises, LLC ("Xandland," "we," "us," or "our"). These Terms constitute a legally binding agreement between you and Xandland Enterprises, LLC.</p>
+          </Section>
 
-            {/* 2. Account Registration & Eligibility */}
-            <section className="space-y-3">
-              <h2 className="text-2xl font-bold text-white flex items-start gap-3">
-                <span className="text-[#e8a020] font-black">2.</span>
-                <span>Account Registration & Eligibility</span>
-              </h2>
-              <p className="text-neutral-300 leading-relaxed ml-9">
-                To use XLShorts, you must be at least 13 years of age. If you are under 18, you represent that you have obtained parental or guardian consent to use this service. By registering, you provide accurate, complete, and current information. You are responsible for maintaining the confidentiality of your account credentials and for all activities that occur under your account. You agree to notify us immediately of any unauthorized access or use of your account.
-              </p>
-            </section>
+          <Section title="2. Eligibility">
+            <p>You must be at least 13 years of age to create an account on XLShorts. Users under 18 should use the Platform only with the involvement and consent of a parent or guardian. By creating an account, you represent that you meet these eligibility requirements.</p>
+            <p>Child profiles created within an account are the responsibility of the account holder. Xandland Enterprises, LLC is not liable for content accessed by minors through improperly configured profiles.</p>
+          </Section>
 
-            {/* 3. Permitted Use */}
-            <section className="space-y-3">
-              <h2 className="text-2xl font-bold text-white flex items-start gap-3">
-                <span className="text-[#e8a020] font-black">3.</span>
-                <span>Permitted Use</span>
-              </h2>
-              <p className="text-neutral-300 leading-relaxed ml-9">
-                XLShorts is provided for your personal, non-commercial viewing and enjoyment. You may not reproduce, distribute, transmit, display, perform, or transfer any content from XLShorts without express written permission. You may not use the platform for any commercial purpose, including but not limited to streaming content for profit or incorporating it into another service.
-              </p>
-            </section>
+          <Section title="3. Accounts and Profiles">
+            <p>You are responsible for maintaining the security of your account credentials. XLShorts supports multiple viewer profiles under a single account to accommodate families and households. You are responsible for all activity that occurs under your account, including activity on any profiles created within it.</p>
+            <p>You may not transfer your account to another party without our written consent.</p>
+          </Section>
 
-            {/* 4. Content & Conduct */}
-            <section className="space-y-3">
-              <h2 className="text-2xl font-bold text-white flex items-start gap-3">
-                <span className="text-[#e8a020] font-black">4.</span>
-                <span>Content & Conduct</span>
-              </h2>
-              <p className="text-neutral-300 leading-relaxed ml-9">
-                You agree not to use XLShorts in any manner that:
-              </p>
-              <ul className="ml-9 space-y-2 text-neutral-300">
-                <li className="flex gap-3">
-                  <span className="text-[#e8a020]">•</span>
-                  <span>Harasses, threatens, defames, or abuses others</span>
-                </li>
-                <li className="flex gap-3">
-                  <span className="text-[#e8a020]">•</span>
-                  <span>Violates any applicable laws, regulations, or third-party rights</span>
-                </li>
-                <li className="flex gap-3">
-                  <span className="text-[#e8a020]">•</span>
-                  <span>Infringes on intellectual property rights</span>
-                </li>
-                <li className="flex gap-3">
-                  <span className="text-[#e8a020]">•</span>
-                  <span>Attempts to gain unauthorized access to our systems</span>
-                </li>
-                <li className="flex gap-3">
-                  <span className="text-[#e8a020]">•</span>
-                  <span>Introduces malware, viruses, or harmful code</span>
-                </li>
-                <li className="flex gap-3">
-                  <span className="text-[#e8a020]">•</span>
-                  <span>Engages in spam or unsolicited communications</span>
-                </li>
-              </ul>
-            </section>
+          <Section title="4. Creator Terms — Content Submission">
+            <p>By submitting a film or other content to XLShorts ("Content"), you represent and warrant that:</p>
+            <ul className="list-disc pl-5 space-y-1.5">
+              <li>You own the Content or have the necessary rights, licenses, and permissions to submit and distribute it on the Platform.</li>
+              <li>Your Content does not infringe the intellectual property rights, privacy rights, or any other rights of any third party.</li>
+              <li>You have obtained all necessary clearances for music, footage, likenesses, and any other third-party elements included in your Content.</li>
+              <li>Your Content does not violate any applicable law or regulation.</li>
+            </ul>
+          </Section>
 
-            {/* 5. Intellectual Property */}
-            <section className="space-y-3">
-              <h2 className="text-2xl font-bold text-white flex items-start gap-3">
-                <span className="text-[#e8a020] font-black">5.</span>
-                <span>Intellectual Property</span>
-              </h2>
-              <p className="text-neutral-300 leading-relaxed ml-9">
-                Xandland Enterprises, LLC owns all intellectual property rights in the XLShorts brand, platform, interface, design, and technology. Creators retain full ownership of their submitted content. By uploading content to XLShorts, creators grant Xandland Enterprises, LLC a license to host, display, stream, and promote that content on the platform (see Creator section below for full details).
-              </p>
-            </section>
+          <Section title="5. Non-Exclusive License">
+            <p>By submitting Content to XLShorts, you grant Xandland Enterprises, LLC a <span className="text-white font-semibold">non-exclusive</span>, worldwide, royalty-free license to host, stream, display, and promote your Content on the Platform and in connection with marketing XLShorts.</p>
+            <p>This license is <span className="text-white font-semibold">non-exclusive</span>. You retain full ownership of your Content and may distribute it on other platforms, festivals, or through any other channel of your choosing. Submitting to XLShorts does not restrict your rights to distribute your work elsewhere.</p>
+            <p>You may request removal of your Content from the Platform at any time. We will process removal requests within a reasonable timeframe, subject to any outstanding moderation or dispute processes.</p>
+          </Section>
 
-            {/* 6. Limitation of Liability */}
-            <section className="space-y-3">
-              <h2 className="text-2xl font-bold text-white flex items-start gap-3">
-                <span className="text-[#e8a020] font-black">6.</span>
-                <span>Limitation of Liability</span>
-              </h2>
-              <div className="ml-9 space-y-3">
-                <p className="text-neutral-300 leading-relaxed">
-                  <strong className="text-white">XLShorts and Xandland Enterprises, LLC are not responsible for the content of films uploaded by creators.</strong> We rely on creators to accurately represent their content through metadata and content flags. While we make reasonable efforts to review content, we cannot guarantee that all content meets stated content descriptors or that the platform is free of offensive, inappropriate, or illegal material.
-                </p>
-                <p className="text-neutral-300 leading-relaxed">
-                  The platform is provided on an "as-is" basis. To the fullest extent permitted by law, we disclaim all warranties, express or implied, including but not limited to warranties of merchantability, fitness for a particular purpose, and non-infringement. We shall not be liable for any indirect, incidental, special, consequential, or punitive damages arising from your use of or inability to use XLShorts.
-                </p>
-              </div>
-            </section>
+          <Section title="6. Content Accuracy and Moderation">
+            <p>Creators are required to accurately describe the content of their films using the Platform's content labeling system, including age tier designation (Family, Teen, or Adult) and all applicable content flags (language, violence, nudity, drug use, mature themes, etc.).</p>
+            <p className="text-white/90 font-medium border-l-2 border-[#e8a020] pl-4">
+              Misrepresenting the content of your film — including labeling adult or mature material as family-safe — is a violation of these Terms and may result in the immediate removal of your Content and the permanent suspension of your account.
+            </p>
+            <p>XLShorts reserves the right to review any Content submitted to the Platform. We may adjust content labels, restrict visibility, or remove Content at our sole discretion if we determine that it violates these Terms or our Community Guidelines.</p>
+            <p>While we make reasonable efforts to review flagged Content, <span className="text-white font-semibold">Xandland Enterprises, LLC is not responsible for the accuracy of creator-submitted content labels</span>. We rely on creators to label their Content honestly and cannot guarantee that all Content has been perfectly categorized. Users and parents are encouraged to preview Content and use the Platform's parental control features accordingly.</p>
+          </Section>
 
-            {/* 7. No Rating System Disclaimer */}
-            <section className="space-y-3">
-              <h2 className="text-2xl font-bold text-white flex items-start gap-3">
-                <span className="text-[#e8a020] font-black">7.</span>
-                <span>No Official Rating System</span>
-              </h2>
-              <p className="text-neutral-300 leading-relaxed ml-9">
-                Short films on XLShorts do not have an official MPAA-style rating. Content flags and descriptors are self-reported by creators and provided as guidance only. XLShorts does not independently verify or endorse these descriptors. Parents, guardians, and viewers are responsible for reviewing available information before watching content.
-              </p>
-            </section>
+          <Section title="7. Prohibited Content">
+            <p>The following Content is strictly prohibited on XLShorts and will result in immediate removal and account termination:</p>
+            <ul className="list-disc pl-5 space-y-1.5">
+              <li>Content that sexualizes, exploits, or endangers minors in any way.</li>
+              <li>Content that promotes, incites, or glorifies violence, terrorism, or hate crimes.</li>
+              <li>Content that constitutes defamation, harassment, or targeted abuse of identifiable individuals.</li>
+              <li>Content that infringes the intellectual property rights of third parties.</li>
+              <li>Content that is deceptive, fraudulent, or designed to mislead viewers.</li>
+              <li>Any other content that violates applicable federal, state, or local law.</li>
+            </ul>
+          </Section>
 
-            {/* 8. Parental Responsibility */}
-            <section className="space-y-3">
-              <h2 className="text-2xl font-bold text-white flex items-start gap-3">
-                <span className="text-[#e8a020] font-black">8.</span>
-                <span>Parental Responsibility</span>
-              </h2>
-              <p className="text-neutral-300 leading-relaxed ml-9">
-                Parents and guardians are responsible for supervising minor viewing on XLShorts. We encourage parental controls and age-appropriate content selection. XLShorts is not responsible for ensuring that minors are exposed only to age-appropriate content if parents or guardians fail to exercise supervision.
-              </p>
-            </section>
+          <Section title="8. Advertising and Revenue">
+            <p>XLShorts may display advertising on the Platform, including ads served through third-party advertising networks such as Google AdSense. Revenue generated through third-party advertising networks may be shared with creators in accordance with the Platform's monetization terms, as communicated separately.</p>
+            <p>XLShorts and Xandland Enterprises, LLC may also display house advertisements promoting Xandland's own products, services, and affiliated platforms (including but not limited to XLCoverage, XLResumes, and Xandland.com). <span className="text-white font-semibold">House advertisements for Xandland Enterprises or its affiliated brands do not generate creator revenue.</span> This is standard practice across streaming and content platforms and is not a basis for compensation claims.</p>
+          </Section>
 
-            {/* 9. Termination */}
-            <section className="space-y-3">
-              <h2 className="text-2xl font-bold text-white flex items-start gap-3">
-                <span className="text-[#e8a020] font-black">9.</span>
-                <span>Termination</span>
-              </h2>
-              <p className="text-neutral-300 leading-relaxed ml-9">
-                Xandland Enterprises, LLC reserves the right to terminate or suspend your account at any time, with or without cause. Violations of these Terms, illegal activity, or conduct that harms the platform or other users may result in immediate termination. Upon termination, your right to use the platform ceases immediately.
-              </p>
-            </section>
+          <Section title="9. Viewer Conduct">
+            <p>As a viewer, you agree not to:</p>
+            <ul className="list-disc pl-5 space-y-1.5">
+              <li>Circumvent or attempt to circumvent any content restrictions, including parental controls or age verification measures.</li>
+              <li>Download, reproduce, or redistribute Content from the Platform without the creator's express permission.</li>
+              <li>Use automated tools, bots, or scrapers to access or collect data from the Platform.</li>
+              <li>Attempt to gain unauthorized access to any portion of the Platform or its underlying infrastructure.</li>
+            </ul>
+          </Section>
 
-            {/* 10. Governing Law */}
-            <section className="space-y-3">
-              <h2 className="text-2xl font-bold text-white flex items-start gap-3">
-                <span className="text-[#e8a020] font-black">10.</span>
-                <span>Governing Law</span>
-              </h2>
-              <p className="text-neutral-300 leading-relaxed ml-9">
-                These Terms are governed by and construed in accordance with the laws of the United States, without regard to its conflicts of law provisions. Any legal action or proceeding relating to these Terms shall be brought exclusively in the courts located in the United States.
-              </p>
-            </section>
+          <Section title="10. Intellectual Property">
+            <p>The XLShorts platform, including its design, branding, software, and non-creator content, is owned by Xandland Enterprises, LLC and is protected by applicable intellectual property laws. The Xandland name, logo, and XLShorts name and logo are trademarks of Xandland Enterprises, LLC.</p>
+            <p>Creator Content remains the intellectual property of the respective creator. Xandland Enterprises, LLC makes no claim of ownership over Content submitted by creators beyond the non-exclusive license described in Section 5.</p>
+          </Section>
 
-            {/* CREATOR SECTION */}
-            <div className="border-t border-white/10 pt-8">
-              <h2 className="text-3xl font-bold text-white mb-6 flex items-start gap-3">
-                <span className="text-[#e8a020]">FOR CREATORS</span>
-              </h2>
+          <Section title="11. Disclaimers and Limitation of Liability">
+            <p>THE PLATFORM IS PROVIDED "AS IS" AND "AS AVAILABLE" WITHOUT WARRANTIES OF ANY KIND, EXPRESS OR IMPLIED. XANDLAND ENTERPRISES, LLC DOES NOT WARRANT THAT THE PLATFORM WILL BE UNINTERRUPTED, ERROR-FREE, OR FREE OF HARMFUL COMPONENTS.</p>
+            <p>TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, XANDLAND ENTERPRISES, LLC SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES ARISING FROM YOUR USE OF THE PLATFORM OR ANY CONTENT ACCESSED THROUGH IT.</p>
+            <p>Xandland Enterprises, LLC is not responsible for the content, accuracy, or opinions expressed in creator-submitted films. Views expressed in Content do not represent the views of Xandland Enterprises, LLC.</p>
+          </Section>
 
-              {/* 11. Creator Eligibility */}
-              <section className="space-y-3">
-                <h2 className="text-2xl font-bold text-white flex items-start gap-3">
-                  <span className="text-[#e8a020] font-black">11.</span>
-                  <span>Creator Eligibility</span>
-                </h2>
-                <p className="text-neutral-300 leading-relaxed ml-9">
-                  To upload and distribute content on XLShorts, you must apply for a creator account and be approved by Xandland Enterprises, LLC. We review all creator applications and reserve the right to accept or reject any application at our sole discretion. Approved creators agree to comply with all terms in this Creator section and all general platform terms.
-                </p>
-              </section>
+          <Section title="12. Termination">
+            <p>We reserve the right to suspend or terminate your account at any time, with or without notice, for conduct that we determine violates these Terms or is otherwise harmful to the Platform, its users, or third parties.</p>
+            <p>You may terminate your account at any time by contacting us. Upon termination, your right to access the Platform ceases immediately.</p>
+          </Section>
 
-              {/* 12. Content License */}
-              <section className="space-y-3">
-                <h2 className="text-2xl font-bold text-white flex items-start gap-3">
-                  <span className="text-[#e8a020] font-black">12.</span>
-                  <span>Content License</span>
-                </h2>
-                <p className="text-neutral-300 leading-relaxed ml-9">
-                  By uploading content to XLShorts, you grant Xandland Enterprises, LLC a <strong className="text-white">non-exclusive, royalty-free, worldwide license</strong> to host, display, stream, and promote your content on the XLShorts platform. You retain full ownership of your content. This license does not transfer ownership or grant exclusive rights to Xandland Enterprises, LLC.
-                </p>
-              </section>
+          <Section title="13. Governing Law">
+            <p>These Terms are governed by the laws of the State of Texas, without regard to its conflict of law provisions. Any disputes arising under these Terms shall be subject to the exclusive jurisdiction of the courts located in Texas.</p>
+          </Section>
 
-              {/* 13. Cross-Platform Rights */}
-              <section className="space-y-3">
-                <h2 className="text-2xl font-bold text-white flex items-start gap-3">
-                  <span className="text-[#e8a020] font-black">13.</span>
-                  <span>Cross-Platform Rights</span>
-                </h2>
-                <p className="text-neutral-300 leading-relaxed ml-9">
-                  Creators are <strong className="text-white">free to distribute their content on other platforms simultaneously.</strong> XLShorts makes no exclusivity claim on creator content. You may share your films on YouTube, Vimeo, your own website, or any other platform while also distributing on XLShorts.
-                </p>
-              </section>
+          <Section title="14. Changes to These Terms">
+            <p>We may update these Terms from time to time. We will notify registered users of material changes by posting a notice on the Platform or by email. Your continued use of the Platform after changes are posted constitutes your acceptance of the updated Terms.</p>
+          </Section>
 
-              {/* 14. No Upfront Payment */}
-              <section className="space-y-3">
-                <h2 className="text-2xl font-bold text-white flex items-start gap-3">
-                  <span className="text-[#e8a020] font-black">14.</span>
-                  <span>No Upfront Payment</span>
-                </h2>
-                <p className="text-neutral-300 leading-relaxed ml-9">
-                  Creators will <strong className="text-white">not be paid directly</strong> for Xandland Enterprises, LLC to use their content on the platform. Compensation is provided exclusively through the ad revenue sharing program (see next section).
-                </p>
-              </section>
+          <Section title="15. Contact">
+            <p>If you have questions about these Terms, please contact Xandland Enterprises, LLC at:</p>
+            <p className="text-neutral-300">legal@xandland.com</p>
+          </Section>
 
-              {/* 15. Ad Revenue Share */}
-              <section className="space-y-3">
-                <h2 className="text-2xl font-bold text-white flex items-start gap-3">
-                  <span className="text-[#e8a020] font-black">15.</span>
-                  <span>Ad Revenue Share Program</span>
-                </h2>
-                <div className="ml-9 space-y-3">
-                  <p className="text-neutral-300 leading-relaxed">
-                    Creators earn revenue through XLShorts' ad revenue sharing program. The current split is <strong className="text-white">70% to the creator, 30% to Xandland Enterprises, LLC,</strong> calculated based on ad impressions generated on the creator's content.
-                  </p>
-                  <p className="text-neutral-300 leading-relaxed">
-                    This revenue split may be adjusted by Xandland Enterprises, LLC with 30 days prior written notice. Revenue is calculated monthly and paid to creators via the payment method provided in their creator account. Minimum payout thresholds may apply.
-                  </p>
-                </div>
-              </section>
-
-              {/* 16. Creator Responsibilities */}
-              <section className="space-y-3">
-                <h2 className="text-2xl font-bold text-white flex items-start gap-3">
-                  <span className="text-[#e8a020] font-black">16.</span>
-                  <span>Creator Responsibilities</span>
-                </h2>
-                <p className="text-neutral-300 leading-relaxed ml-9">
-                  Creators must accurately complete all content metadata and content flag fields. <strong className="text-white">Providing false content descriptors—such as marking adult content as child-safe—is grounds for immediate account termination.</strong> Creators are responsible for ensuring their content complies with applicable laws and does not infringe on third-party rights. Any misrepresentation of content is a material breach of these Terms.
-                </p>
-              </section>
-
-              {/* 17. Content Removal */}
-              <section className="space-y-3">
-                <h2 className="text-2xl font-bold text-white flex items-start gap-3">
-                  <span className="text-[#e8a020] font-black">17.</span>
-                  <span>Content Removal</span>
-                </h2>
-                <p className="text-neutral-300 leading-relaxed ml-9">
-                  Xandland Enterprises, LLC reserves the right to remove content that violates these Terms, is reported by users, or is determined to be harmful, at its sole discretion. We are not obligated to provide notice or explanation prior to removal, though we will make reasonable efforts to inform creators of termination and the reasons for removal.
-                </p>
-              </section>
-            </div>
-
-            {/* Footer */}
-            <div className="border-t border-white/10 pt-8 mt-8">
-              <p className="text-neutral-500 text-sm mb-4">
-                Questions about our Terms of Service? Contact us at <span className="text-white">support@xandland.com</span>
-              </p>
-              <p className="text-neutral-500 text-sm">
-                For privacy inquiries, see our <Link to="/privacy" className="text-[#e8a020] hover:underline">Privacy Policy</Link>.
-              </p>
-            </div>
-          </div>
         </div>
       </main>
     </div>
