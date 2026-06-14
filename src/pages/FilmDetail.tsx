@@ -181,6 +181,7 @@ export default function FilmDetail() {
   const [moreEpisodes, setMoreEpisodes] = useState<Film[]>([]);
   const [relatedFilms, setRelatedFilms] = useState<Film[]>([]);
   const [directorFilms, setDirectorFilms] = useState<Film[]>([]);
+  const [credits, setCredits] = useState<any[]>([]);
   const [inWatchlist, setInWatchlist] = useState(false);
   const [userRating, setUserRating] = useState<number | null>(null);
   const [avgRating, setAvgRating] = useState(0);
@@ -220,6 +221,14 @@ export default function FilmDetail() {
       ]);
       setRelatedFilms(relRes.data ?? []);
       setDirectorFilms((dirRes.data ?? []) as Film[]);
+
+      // Load film credits
+      const { data: creditData } = await supabase
+        .from('film_credits')
+        .select('id, name, role, character_name, profile_id, xlshorts_profiles(slug)')
+        .eq('film_id', filmId)
+        .order('billing_order');
+      setCredits(creditData ?? []);
 
       // If episode, load series + more episodes
       if (f.content_type === 'episode' && f.series_id) {
@@ -451,21 +460,56 @@ export default function FilmDetail() {
         </div>
 
         {/* Cast & Crew */}
-        {(film.cast_members?.length > 0 || film.writer || film.producer || film.production_company || film.awards || film.festival_selections?.length > 0) && (
+        {(credits.length > 0 || film.cast_members?.length > 0 || film.writer || film.producer || film.production_company || film.awards || film.festival_selections?.length > 0) && (
           <div className="mt-12 bg-[#141414] border border-white/8 rounded-2xl p-6">
             <h2 className="text-lg font-bold text-white mb-5 flex items-center gap-2">
               <FilmIcon size={17} className="text-[#e8a020]" /> Film Details
             </h2>
+
+            {/* Linked credits from film_credits table */}
+            {credits.length > 0 && (
+              <div className="mb-6">
+                {(['director', 'writer', 'producer', 'actor', 'cinematographer', 'editor', 'composer', 'other'] as const).map(role => {
+                  const roleCredits = credits.filter((c: any) => c.role === role);
+                  if (roleCredits.length === 0) return null;
+                  const label = role.charAt(0).toUpperCase() + role.slice(1) + (roleCredits.length > 1 ? 's' : '');
+                  return (
+                    <div key={role} className="mb-4">
+                      <p className="text-xs text-neutral-500 uppercase tracking-wider mb-2">{label}</p>
+                      <div className="flex flex-wrap gap-2">
+                        {roleCredits.map((c: any) => {
+                          const slug = c.xlshorts_profiles?.slug;
+                          const inner = (
+                            <span className="flex items-center gap-1.5">
+                              <span className="text-sm font-medium">{c.name}</span>
+                              {c.character_name && <span className="text-xs text-neutral-500">as {c.character_name}</span>}
+                              {slug && <span className="text-[#e8a020] text-xs">↗</span>}
+                            </span>
+                          );
+                          return slug ? (
+                            <Link key={c.id} to={`/people/${slug}`}
+                              className="px-3 py-1.5 bg-white/5 hover:bg-[#e8a020]/10 border border-white/8 hover:border-[#e8a020]/30 rounded-lg text-white transition-all">
+                              {inner}
+                            </Link>
+                          ) : (
+                            <span key={c.id} className="px-3 py-1.5 bg-white/5 border border-white/8 rounded-lg text-neutral-300">
+                              {inner}
+                            </span>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Fallback text-based fields */}
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-              {film.director && (
+              {credits.filter((c: any) => c.role === 'director').length === 0 && film.director && (
                 <div>
                   <p className="text-xs text-neutral-500 uppercase tracking-wider mb-1">Director</p>
-                  <Link
-                    to={`/browse?director=${encodeURIComponent(film.director)}`}
-                    className="text-white font-medium hover:text-[#e8a020] transition-colors"
-                  >
-                    {film.director}
-                  </Link>
+                  <p className="text-white font-medium">{film.director}</p>
                 </div>
               )}
               {film.writer && (
@@ -498,7 +542,7 @@ export default function FilmDetail() {
                   <p className="text-white font-medium flex items-center gap-1.5"><Globe size={13} />{film.language}</p>
                 </div>
               )}
-              {film.cast_members?.length > 0 && (
+              {credits.filter((c: any) => c.role === 'actor').length === 0 && film.cast_members?.length > 0 && (
                 <div className="sm:col-span-2">
                   <p className="text-xs text-neutral-500 uppercase tracking-wider mb-1 flex items-center gap-1.5">
                     <Users size={12} /> Cast

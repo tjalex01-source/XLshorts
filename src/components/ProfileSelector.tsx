@@ -362,6 +362,14 @@ export function ProfileForm({ existing, userId, profileId, onSave, onCancel }: P
   const [youtube, setYoutube] = useState(existing?.social_youtube ?? '');
   const [socialX, setSocialX] = useState(existing?.social_x ?? '');
   const [facebook, setFacebook] = useState(existing?.social_facebook ?? '');
+  const [pubInstagram, setPubInstagram] = useState((existing as any)?.public_social_instagram ?? false);
+  const [pubTiktok, setPubTiktok] = useState((existing as any)?.public_social_tiktok ?? false);
+  const [pubYoutube, setPubYoutube] = useState((existing as any)?.public_social_youtube ?? true);
+  const [pubX, setPubX] = useState((existing as any)?.public_social_x ?? false);
+  const [pubFacebook, setPubFacebook] = useState((existing as any)?.public_social_facebook ?? false);
+  const [pubWebsite, setPubWebsite] = useState((existing as any)?.public_website ?? true);
+  const [pubBio, setPubBio] = useState((existing as any)?.public_bio ?? true);
+  const [pubGenres, setPubGenres] = useState((existing as any)?.public_genres ?? true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
@@ -409,6 +417,13 @@ export function ProfileForm({ existing, userId, profileId, onSave, onCancel }: P
       social_facebook: facebook.trim(),
       preferred_genres: genres,
       notify_new_films: notifyNewFilms,
+      public_bio: pubBio,
+      public_genres: pubGenres,
+      public_social_instagram: pubInstagram,
+      public_social_tiktok: pubTiktok,
+      public_social_youtube: pubYoutube,
+      public_social_x: pubX,
+      public_social_facebook: pubFacebook,
     });
     setSaving(false);
   }
@@ -685,18 +700,43 @@ export function ProfileForm({ existing, userId, profileId, onSave, onCancel }: P
       {/* Step: Social */}
       {step === 'social' && (
         <div className="space-y-4">
-          <p className="text-xs text-neutral-500">Optional — shown on your public profile if you share it.</p>
+          <p className="text-xs text-neutral-500">Add your links below. Use the eye toggle to control what's visible on your public profile.</p>
 
+          {/* Bio visibility */}
+          <div className="flex items-center justify-between px-3 py-2 bg-[#0a0a0a] rounded-xl border border-white/8">
+            <span className="text-sm text-neutral-300">Show bio publicly</span>
+            <button onClick={() => setPubBio(v => !v)} className={`w-9 h-5 rounded-full transition-colors flex items-center px-0.5 ${pubBio ? 'bg-[#e8a020]' : 'bg-white/15'}`}>
+              <div className={`w-4 h-4 rounded-full bg-white transition-transform ${pubBio ? 'translate-x-4' : 'translate-x-0'}`} />
+            </button>
+          </div>
+
+          {/* Genre visibility */}
+          <div className="flex items-center justify-between px-3 py-2 bg-[#0a0a0a] rounded-xl border border-white/8">
+            <span className="text-sm text-neutral-300">Show genres publicly</span>
+            <button onClick={() => setPubGenres(v => !v)} className={`w-9 h-5 rounded-full transition-colors flex items-center px-0.5 ${pubGenres ? 'bg-[#e8a020]' : 'bg-white/15'}`}>
+              <div className={`w-4 h-4 rounded-full bg-white transition-transform ${pubGenres ? 'translate-x-4' : 'translate-x-0'}`} />
+            </button>
+          </div>
+
+          {/* Social links with visibility toggles */}
           {[
-            { icon: Instagram, label: 'Instagram', value: instagram, set: setInstagram, placeholder: '@username' },
-            { icon: Music2, label: 'TikTok', value: tiktok, set: setTiktok, placeholder: '@username' },
-            { icon: Youtube, label: 'YouTube', value: youtube, set: setYoutube, placeholder: 'channel name or URL' },
-            { icon: Twitter, label: 'X / Twitter', value: socialX, set: setSocialX, placeholder: '@handle' },
-          ].map(({ icon: Icon, label, value, set, placeholder }) => (
+            { icon: Instagram, label: 'Instagram', value: instagram, set: setInstagram, pub: pubInstagram, setPub: setPubInstagram, placeholder: '@username' },
+            { icon: Music2, label: 'TikTok', value: tiktok, set: setTiktok, pub: pubTiktok, setPub: setPubTiktok, placeholder: '@username' },
+            { icon: Youtube, label: 'YouTube', value: youtube, set: setYoutube, pub: pubYoutube, setPub: setPubYoutube, placeholder: 'channel name or URL' },
+            { icon: Twitter, label: 'X / Twitter', value: socialX, set: setSocialX, pub: pubX, setPub: setPubX, placeholder: '@handle' },
+          ].map(({ icon: Icon, label, value, set, pub, setPub, placeholder }) => (
             <div key={label}>
-              <label className="block text-sm font-medium text-neutral-400 mb-1.5 flex items-center gap-1.5">
-                <Icon size={14} /> {label}
-              </label>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="text-sm font-medium text-neutral-400 flex items-center gap-1.5">
+                  <Icon size={14} /> {label}
+                </label>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-neutral-600">{pub ? 'Public' : 'Private'}</span>
+                  <button onClick={() => setPub((v: boolean) => !v)} className={`w-9 h-5 rounded-full transition-colors flex items-center px-0.5 ${pub ? 'bg-[#e8a020]' : 'bg-white/15'}`}>
+                    <div className={`w-4 h-4 rounded-full bg-white transition-transform ${pub ? 'translate-x-4' : 'translate-x-0'}`} />
+                  </button>
+                </div>
+              </div>
               <input
                 type="text"
                 value={value}
@@ -708,9 +748,15 @@ export function ProfileForm({ existing, userId, profileId, onSave, onCancel }: P
           ))}
 
           <div>
-            <label className="block text-sm font-medium text-neutral-400 mb-1.5 flex items-center gap-1.5">
-              <div className="text-sm font-bold text-white bg-[#1877F2] rounded w-4 h-4 flex items-center justify-center">f</div> Facebook
-            </label>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="text-sm font-medium text-neutral-400">Facebook</label>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-neutral-600">{pubFacebook ? 'Public' : 'Private'}</span>
+                <button onClick={() => setPubFacebook(v => !v)} className={`w-9 h-5 rounded-full transition-colors flex items-center px-0.5 ${pubFacebook ? 'bg-[#e8a020]' : 'bg-white/15'}`}>
+                  <div className={`w-4 h-4 rounded-full bg-white transition-transform ${pubFacebook ? 'translate-x-4' : 'translate-x-0'}`} />
+                </button>
+              </div>
+            </div>
             <input
               type="text"
               value={facebook}
@@ -868,6 +914,13 @@ export default function ProfileSelector({ onComplete }: ProfileSelectorProps) {
       social_facebook: data.social_facebook ?? '',
       preferred_genres: data.preferred_genres ?? [],
       notify_new_films: data.notify_new_films ?? false,
+      public_bio: (data as any).public_bio ?? true,
+      public_genres: (data as any).public_genres ?? true,
+      public_social_instagram: (data as any).public_social_instagram ?? false,
+      public_social_tiktok: (data as any).public_social_tiktok ?? false,
+      public_social_youtube: (data as any).public_social_youtube ?? true,
+      public_social_x: (data as any).public_social_x ?? false,
+      public_social_facebook: (data as any).public_social_facebook ?? false,
     };
 
     if (data.pin !== undefined) {

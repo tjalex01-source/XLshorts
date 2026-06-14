@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import CreatorAnalytics from './CreatorAnalytics';
 import * as XLSX from 'xlsx';
+import FilmCreditsTagger from '../components/FilmCreditsTagger';
 
 type AccessState = 'loading' | 'has_access' | 'pending_request' | 'rejected_request' | 'no_request';
 
@@ -1095,6 +1096,7 @@ function FilmUploadForm({ userId, film, contentType, lockedSeriesId, lockedSeaso
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [editingFilmId, setEditingFilmId] = useState<string | null>(film?.id ?? null);
   const [activeSection, setActiveSection] = useState<'basic' | 'episode' | 'genre' | 'production' | 'video' | 'content'>(contentType === 'episode' ? 'episode' : 'basic');
 
   const [castCrewPreview, setCastCrewPreview] = useState<ParsedCastCrew | null>(null);
@@ -1290,6 +1292,7 @@ function FilmUploadForm({ userId, film, contentType, lockedSeriesId, lockedSeaso
     }
 
     setSaving(false);
+    if (filmId) setEditingFilmId(filmId);
     onSave();
   }
 
@@ -1523,6 +1526,13 @@ function FilmUploadForm({ userId, film, contentType, lockedSeriesId, lockedSeaso
             <div className="grid sm:grid-cols-2 gap-4">
               <div><label className={labelCls}>Film Website</label><input type="url" value={data.website_url} onChange={e => set('website_url', e.target.value)} placeholder="https://" className={inputCls} /></div>
               <div><label className={labelCls}>Trailer URL</label><input type="url" value={data.trailer_url} onChange={e => set('trailer_url', e.target.value)} placeholder="https://" className={inputCls} /></div>
+            </div>
+
+            {/* Film Credits — link to XLShorts profiles */}
+            <div className="pt-4 border-t border-white/8">
+              <p className="text-sm font-semibold text-neutral-300 mb-1">Link Credits to XLShorts Profiles</p>
+              <p className="text-xs text-neutral-600 mb-3">Tag registered XLShorts members so they appear on their public profile page. Saves after the film is published.</p>
+              <FilmCreditsTagger filmId={editingFilmId} />
             </div>
           </section>
         )}

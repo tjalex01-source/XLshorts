@@ -20,6 +20,7 @@ import AccountProfile from './pages/AccountProfile';
 import SeriesDetail from './pages/SeriesDetail';
 import Terms from './pages/Terms';
 import PrivacyPolicy from './pages/PrivacyPolicy';
+import PersonPage from './pages/PersonPage';
 import { Loader2 } from 'lucide-react';
 
 function AppRoutes() {
@@ -49,6 +50,7 @@ function AppRoutes() {
       <Route path="/creator" element={<Creator />} />
       <Route path="/terms" element={<Terms />} />
       <Route path="/privacy" element={<PrivacyPolicy />} />
+      <Route path="/people/:slug" element={<PersonPage />} />
 
       {!user && <Route path="/" element={<Splash />} />}
 
