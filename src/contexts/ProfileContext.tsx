@@ -113,10 +113,15 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
   }): Promise<{ error: Error | null; profile: Profile | null }> {
     if (!user) return { error: new Error('Not authenticated'), profile: null };
     const pin_hash = data.pin ? hashPin(data.pin) : null;
+    const slug = (data.name ?? '')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '') + '-' + Math.random().toString(36).slice(2, 8);
     const { data: created, error } = await supabase
       .from('xlshorts_profiles')
       .insert({
         user_id: user.id,
+        slug,
         name: data.name,
         avatar_color: data.avatar_color,
         avatar_letter: data.avatar_letter,
