@@ -512,7 +512,7 @@ export default function FilmDetail() {
                   <p className="text-white font-medium">{film.director}</p>
                 </div>
               )}
-              {film.writer && (
+              {credits.filter((c: any) => c.role === 'writer').length === 0 && film.writer && (
                 <div>
                   <p className="text-xs text-neutral-500 uppercase tracking-wider mb-1">Writer</p>
                   <p className="text-white font-medium">{film.writer}</p>
