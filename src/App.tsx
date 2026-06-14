@@ -3,6 +3,7 @@ import { AuthProvider } from './contexts/AuthContext';
 import { ProfileProvider } from './contexts/ProfileContext';
 import { useAuth } from './contexts/AuthContext';
 import { useProfile } from './contexts/ProfileContext';
+import ScrollToTop from './components/ScrollToTop';
 import Layout from './components/Layout';
 import ProfileSelector from './components/ProfileSelector';
 import Home from './pages/Home';
@@ -79,6 +80,7 @@ export default function App() {
     <AuthProvider>
       <ProfileProvider>
         <BrowserRouter>
+          <ScrollToTop />
           <AppRoutes />
         </BrowserRouter>
       </ProfileProvider>
