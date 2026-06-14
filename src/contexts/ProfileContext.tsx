@@ -69,7 +69,7 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
     if (!user) return;
     setLoadingProfiles(true);
     const { data } = await supabase
-      .from('profiles')
+      .from('xlshorts_profiles')
       .select('*')
       .eq('user_id', user.id)
       .order('created_at');
@@ -105,7 +105,7 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
     if (!user) return { error: new Error('Not authenticated'), profile: null };
     const pin_hash = data.pin ? hashPin(data.pin) : null;
     const { data: created, error } = await supabase
-      .from('profiles')
+      .from('xlshorts_profiles')
       .insert({
         user_id: user.id,
         name: data.name,
@@ -125,13 +125,13 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
   }
 
   async function updateProfile(id: string, data: Partial<Profile>): Promise<{ error: Error | null }> {
-    const { error } = await supabase.from('profiles').update(data).eq('id', id);
+    const { error } = await supabase.from('xlshorts_profiles').update(data).eq('id', id);
     if (!error) await refreshProfiles();
     return { error: error as Error | null };
   }
 
   async function deleteProfile(id: string): Promise<{ error: Error | null }> {
-    const { error } = await supabase.from('profiles').delete().eq('id', id);
+    const { error } = await supabase.from('xlshorts_profiles').delete().eq('id', id);
     if (!error) {
       if (activeProfile?.id === id) {
         setActiveProfileState(null);

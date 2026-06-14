@@ -36,7 +36,7 @@ export interface Database {
         Insert: Partial<WatchHistoryItem>;
         Update: Partial<WatchHistoryItem>;
       };
-      profiles: {
+      xlshorts_profiles: {
         Row: Profile;
         Insert: Partial<Profile>;
         Update: Partial<Profile>;
