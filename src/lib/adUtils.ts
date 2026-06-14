@@ -12,7 +12,7 @@ export function getAdSchedule(filmDurationSeconds: number): AdSchedule {
   } else if (filmDurationSeconds <= 900) {
     return { preRollSeconds: 60, midRollSeconds: 0, midRollTrigger: null };
   } else {
-    // 30-60 second mid-roll; seed with film duration so it's consistent per film
+    // 30–60 second mid-roll; seed with film duration so it's consistent per film
     const midRollSeconds = 30 + ((filmDurationSeconds % 31));
     const midRollTrigger = Math.floor(filmDurationSeconds * 0.45);
     return { preRollSeconds: 60, midRollSeconds, midRollTrigger };
