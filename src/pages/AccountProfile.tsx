@@ -439,15 +439,10 @@ function ApplicationForm({ reason, setReason, onSubmit, submitting, error }: {
 // Create Profile Modal
 // ─────────────────────────────────────────────
 
-const AVATAR_COLORS_CP = [
-  '#e8a020', '#dc2626', '#16a34a', '#2563eb',
-  '#db2777', '#0891b2', '#ea580c', '#65a30d',
-  '#0f766e', '#b45309',
-];
 
 function CreateProfileModal({ onClose }: { onClose: () => void }) {
   const { user } = useAuth();
-  const { createProfile, refreshProfiles } = useProfile();
+  const { createProfile } = useProfile();
 
   async function handleSave(data: Parameters<typeof createProfile>[0]) {
     await createProfile(data);
