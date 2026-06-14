@@ -401,9 +401,12 @@ function FilmsTab() {
   const [films, setFilms] = useState<Film[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [reviewFilter, setReviewFilter] = useState<string>('all');
   const [search, setSearch] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [editFilm, setEditFilm] = useState<Film | null>(null);
+  const [reviewNote, setReviewNote] = useState('');
+  const [reviewingId, setReviewingId] = useState<string | null>(null);
 
   useEffect(() => { loadFilms(); }, []);
 
@@ -419,6 +422,19 @@ function FilmsTab() {
     loadFilms();
   }
 
+  async function setReviewStatus(id: string, reviewStatus: string, note?: string) {
+    await supabase.from('films').update({
+      admin_review_status: reviewStatus,
+      admin_review_note: note ?? null,
+      reviewed_at: new Date().toISOString(),
+    }).eq('id', id);
+    if (reviewStatus === 'approved') await supabase.from('films').update({ status: 'published' }).eq('id', id);
+    if (reviewStatus === 'removed') await supabase.from('films').update({ status: 'rejected' }).eq('id', id);
+    setReviewingId(null);
+    setReviewNote('');
+    loadFilms();
+  }
+
   async function toggleFeatured(film: Film) {
     await supabase.from('films').update({ featured: !film.featured }).eq('id', film.id);
     loadFilms();
@@ -431,10 +447,14 @@ function FilmsTab() {
   }
 
   const filtered = films.filter(f => {
+    const ff = f as any;
     if (statusFilter !== 'all' && f.status !== statusFilter) return false;
+    if (reviewFilter !== 'all' && ff.admin_review_status !== reviewFilter) return false;
     if (search && !f.title.toLowerCase().includes(search.toLowerCase())) return false;
     return true;
   });
+
+  const pendingReview = films.filter(f => (f as any).admin_review_status === 'pending_review');
 
   const statusColors: Record<string, string> = {
     published: 'text-green-400 bg-green-400/10',
@@ -442,6 +462,27 @@ function FilmsTab() {
     draft: 'text-neutral-400 bg-white/5',
     rejected: 'text-red-400 bg-red-400/10',
   };
+
+  const reviewColors: Record<string, string> = {
+    approved: 'text-green-400 bg-green-400/10',
+    pending_review: 'text-yellow-400 bg-yellow-400/10',
+    removed: 'text-red-400 bg-red-400/10',
+  };
+
+  function getContentFlags(film: any): string[] {
+    const flags = [];
+    if (film.flag_language_mild) flags.push('Mild Language');
+    if (film.flag_language_strong) flags.push('Strong Language');
+    if (film.flag_violence) flags.push('Violence');
+    if (film.flag_gore) flags.push('Gore');
+    if (film.flag_sexual_content) flags.push('Sexual Content');
+    if (film.flag_nudity) flags.push('Nudity');
+    if (film.flag_drug_use) flags.push('Drug Use');
+    if (film.flag_alcohol_tobacco) flags.push('Alcohol/Tobacco');
+    if (film.flag_frightening) flags.push('Frightening');
+    if (film.flag_thematic_complexity) flags.push('Mature Themes');
+    return flags;
+  }
 
   return (
     <div>
@@ -455,6 +496,19 @@ function FilmsTab() {
         </button>
       </div>
 
+      {/* Pending review alert */}
+      {pendingReview.length > 0 && (
+        <div className="mb-5 p-4 bg-yellow-500/8 border border-yellow-500/20 rounded-xl flex items-center gap-3">
+          <AlertCircle size={16} className="text-yellow-400 shrink-0" />
+          <p className="text-sm text-yellow-300">
+            <strong>{pendingReview.length} film{pendingReview.length > 1 ? 's' : ''} awaiting content review.</strong> Click "Pending Review" below to see them.
+          </p>
+          <button onClick={() => setReviewFilter('pending_review')} className="ml-auto px-3 py-1 bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-300 text-xs font-bold rounded-lg transition-all">
+            View Now
+          </button>
+        </div>
+      )}
+
       {showForm && (
         <FilmForm
           film={editFilm}
@@ -463,7 +517,7 @@ function FilmsTab() {
         />
       )}
 
-      <div className="flex gap-3 mb-5 flex-wrap">
+      <div className="flex gap-3 mb-3 flex-wrap">
         <div className="relative">
           <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500" />
           <input
@@ -473,15 +527,21 @@ function FilmsTab() {
             className="pl-9 pr-4 py-2 bg-[#1a1a1a] border border-white/10 rounded-xl text-white text-sm placeholder-neutral-600 focus:outline-none focus:border-[#e8a020]/50 w-48"
           />
         </div>
-        {['all', 'published', 'pending', 'draft', 'rejected'].map(s => (
-          <button
-            key={s}
-            onClick={() => setStatusFilter(s)}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all capitalize ${
-              statusFilter === s ? 'bg-[#e8a020] text-black' : 'bg-white/5 text-neutral-400 hover:text-white border border-white/8'
-            }`}
-          >
-            {s}
+        <div className="flex gap-2 flex-wrap">
+          {['all', 'published', 'pending', 'draft', 'rejected'].map(s => (
+            <button key={s} onClick={() => setStatusFilter(s)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all capitalize ${statusFilter === s ? 'bg-[#e8a020] text-black' : 'bg-white/5 text-neutral-400 hover:text-white border border-white/8'}`}>
+              {s}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div className="flex gap-2 mb-5 flex-wrap">
+        <span className="text-xs text-neutral-600 self-center mr-1">Review:</span>
+        {['all', 'pending_review', 'approved', 'removed'].map(s => (
+          <button key={s} onClick={() => setReviewFilter(s)}
+            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${reviewFilter === s ? 'bg-[#e8a020] text-black' : 'bg-white/5 text-neutral-400 hover:text-white border border-white/8'}`}>
+            {s === 'pending_review' ? '⚠ Pending Review' : s === 'all' ? 'All' : s.charAt(0).toUpperCase() + s.slice(1)}
           </button>
         ))}
       </div>
@@ -489,45 +549,119 @@ function FilmsTab() {
       {loading ? (
         <div className="flex justify-center py-12"><Loader2 className="animate-spin text-[#e8a020]" size={28} /></div>
       ) : (
-        <div className="space-y-2">
-          {filtered.map(film => (
-            <div key={film.id} className="flex items-center gap-4 p-4 bg-[#141414] border border-white/8 rounded-xl">
-              {film.thumbnail_url && (
-                <img src={film.thumbnail_url} alt={film.title} className="w-14 h-10 object-cover rounded-lg shrink-0" />
-              )}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <p className="text-sm font-semibold text-white truncate">{film.title}</p>
-                  <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusColors[film.status] ?? 'text-neutral-400'}`}>
-                    {film.status}
-                  </span>
-                  {film.featured && <span className="px-2 py-0.5 rounded-full text-xs font-medium text-[#e8a020] bg-[#e8a020]/10">Featured</span>}
+        <div className="space-y-3">
+          {filtered.map(film => {
+            const ff = film as any;
+            const flags = getContentFlags(ff);
+            const isReviewing = reviewingId === film.id;
+            return (
+              <div key={film.id} className={`p-4 bg-[#141414] border rounded-xl ${ff.admin_review_status === 'pending_review' ? 'border-yellow-500/30' : 'border-white/8'}`}>
+                <div className="flex items-start gap-4">
+                  {film.thumbnail_url && (
+                    <img src={film.thumbnail_url} alt={film.title} className="w-16 h-11 object-cover rounded-lg shrink-0" />
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap mb-1">
+                      <p className="text-sm font-semibold text-white">{film.title}</p>
+                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusColors[film.status] ?? 'text-neutral-400'}`}>{film.status}</span>
+                      {ff.admin_review_status && (
+                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${reviewColors[ff.admin_review_status] ?? 'text-neutral-400'}`}>
+                          {ff.admin_review_status === 'pending_review' ? '⚠ Pending Review' : ff.admin_review_status}
+                        </span>
+                      )}
+                      {ff.age_tier && (
+                        <span className="px-2 py-0.5 rounded-full text-xs font-medium text-blue-400 bg-blue-400/10 capitalize">{ff.age_tier}</span>
+                      )}
+                      {film.featured && <span className="px-2 py-0.5 rounded-full text-xs font-medium text-[#e8a020] bg-[#e8a020]/10">Featured</span>}
+                    </div>
+                    <p className="text-xs text-neutral-500">{film.director} · {film.release_year}</p>
+                    {flags.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mt-2">
+                        {flags.map(flag => (
+                          <span key={flag} className="px-1.5 py-0.5 bg-red-500/10 text-red-400 text-xs rounded">{flag}</span>
+                        ))}
+                      </div>
+                    )}
+                    {ff.admin_review_note && (
+                      <p className="text-xs text-neutral-500 mt-1 italic">Note: {ff.admin_review_note}</p>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0 flex-wrap justify-end">
+                    {ff.admin_review_status === 'pending_review' && !isReviewing && (
+                      <>
+                        <button onClick={() => setReviewStatus(film.id, 'approved')}
+                          className="flex items-center gap-1 px-3 py-1.5 bg-green-500/10 hover:bg-green-500/20 text-green-400 text-xs font-medium rounded-lg transition-all">
+                          <Check size={12} /> Approve
+                        </button>
+                        <button onClick={() => setReviewingId(film.id)}
+                          className="flex items-center gap-1 px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs font-medium rounded-lg transition-all">
+                          <X size={12} /> Remove
+                        </button>
+                      </>
+                    )}
+                    {ff.admin_review_status === 'approved' && (
+                      <button onClick={() => setReviewingId(film.id)}
+                        className="flex items-center gap-1 px-3 py-1.5 bg-yellow-500/10 hover:bg-yellow-500/20 text-yellow-400 text-xs font-medium rounded-lg transition-all">
+                        ⚠ Flag for Review
+                      </button>
+                    )}
+                    {film.status === 'pending' && ff.admin_review_status !== 'pending_review' && (
+                      <>
+                        <button onClick={() => setStatus(film.id, 'published')}
+                          className="flex items-center gap-1 px-3 py-1.5 bg-green-500/10 hover:bg-green-500/20 text-green-400 text-xs font-medium rounded-lg transition-all">
+                          <Check size={12} /> Publish
+                        </button>
+                        <button onClick={() => { const r = prompt('Rejection reason (optional):'); setStatus(film.id, 'rejected', r ?? ''); }}
+                          className="flex items-center gap-1 px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs font-medium rounded-lg transition-all">
+                          <X size={12} /> Reject
+                        </button>
+                      </>
+                    )}
+                    <button onClick={() => toggleFeatured(film)} title={film.featured ? 'Remove featured' : 'Add to featured'}
+                      className={`w-8 h-8 flex items-center justify-center rounded-lg transition-all ${film.featured ? 'bg-[#e8a020]/20 text-[#e8a020]' : 'bg-white/5 text-neutral-500 hover:text-white'}`}>
+                      <BarChart2 size={14} />
+                    </button>
+                    <button onClick={() => { setEditFilm(film); setShowForm(true); }}
+                      className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/5 hover:bg-white/15 text-neutral-400 hover:text-white transition-all">
+                      <Edit2 size={14} />
+                    </button>
+                    <button onClick={() => deleteFilm(film.id)}
+                      className="w-8 h-8 flex items-center justify-center rounded-lg bg-red-500/8 hover:bg-red-500/20 text-red-400 transition-all">
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
                 </div>
-                <p className="text-xs text-neutral-500 mt-0.5">{film.director} · {film.rating} · {film.release_year}</p>
-              </div>
-              <div className="flex items-center gap-2 shrink-0">
-                {film.status === 'pending' && (
-                  <>
-                    <button onClick={() => setStatus(film.id, 'published')} className="flex items-center gap-1 px-3 py-1.5 bg-green-500/10 hover:bg-green-500/20 text-green-400 text-xs font-medium rounded-lg transition-all">
-                      <Check size={12} /> Approve
-                    </button>
-                    <button onClick={() => { const r = prompt('Rejection reason (optional):'); setStatus(film.id, 'rejected', r ?? ''); }} className="flex items-center gap-1 px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs font-medium rounded-lg transition-all">
-                      <X size={12} /> Reject
-                    </button>
-                  </>
+
+                {/* Review note input */}
+                {isReviewing && (
+                  <div className="mt-3 pt-3 border-t border-white/8">
+                    <p className="text-xs text-neutral-400 mb-2">Add a note (optional — visible to creator):</p>
+                    <textarea
+                      value={reviewNote}
+                      onChange={e => setReviewNote(e.target.value)}
+                      placeholder="e.g. Film contains adult content not accurately reflected in your content flags..."
+                      rows={2}
+                      className="w-full px-3 py-2 bg-[#0a0a0a] border border-white/10 rounded-xl text-white text-xs placeholder-neutral-600 focus:outline-none focus:border-[#e8a020]/50 resize-none mb-2"
+                    />
+                    <div className="flex gap-2">
+                      <button onClick={() => setReviewStatus(film.id, 'removed', reviewNote)}
+                        className="px-3 py-1.5 bg-red-500/20 hover:bg-red-500/30 text-red-400 text-xs font-bold rounded-lg transition-all">
+                        Remove Film
+                      </button>
+                      <button onClick={() => setReviewStatus(film.id, 'pending_review', reviewNote)}
+                        className="px-3 py-1.5 bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-400 text-xs font-bold rounded-lg transition-all">
+                        Flag for Review
+                      </button>
+                      <button onClick={() => { setReviewingId(null); setReviewNote(''); }}
+                        className="px-3 py-1.5 bg-white/5 hover:bg-white/10 text-neutral-400 text-xs rounded-lg transition-all">
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
                 )}
-                <button onClick={() => toggleFeatured(film)} title={film.featured ? 'Remove featured' : 'Add to featured'} className={`w-8 h-8 flex items-center justify-center rounded-lg transition-all ${film.featured ? 'bg-[#e8a020]/20 text-[#e8a020]' : 'bg-white/5 text-neutral-500 hover:text-white'}`}>
-                  <BarChart2 size={14} />
-                </button>
-                <button onClick={() => { setEditFilm(film); setShowForm(true); }} className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/5 hover:bg-white/15 text-neutral-400 hover:text-white transition-all">
-                  <Edit2 size={14} />
-                </button>
-                <button onClick={() => deleteFilm(film.id)} className="w-8 h-8 flex items-center justify-center rounded-lg bg-red-500/8 hover:bg-red-500/20 text-red-400 transition-all">
-                  <Trash2 size={14} />
-                </button>
               </div>
-            </div>
-          ))}
+            );
+          })}
           {filtered.length === 0 && (
             <div className="text-center py-12 text-neutral-500">No films match this filter.</div>
           )}
