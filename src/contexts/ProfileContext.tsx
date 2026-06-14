@@ -101,7 +101,16 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
     sessionStorage.setItem('xl_active_profile', JSON.stringify(profile));
   }
 
-  async function createProfile(data: CreateProfileData): Promise<{ error: Error | null; profile: Profile | null }> {
+  async function createProfile(data: CreateProfileData & {
+    bio?: string;
+    social_instagram?: string;
+    social_tiktok?: string;
+    social_youtube?: string;
+    social_x?: string;
+    social_facebook?: string;
+    preferred_genres?: string[];
+    notify_new_films?: boolean;
+  }): Promise<{ error: Error | null; profile: Profile | null }> {
     if (!user) return { error: new Error('Not authenticated'), profile: null };
     const pin_hash = data.pin ? hashPin(data.pin) : null;
     const { data: created, error } = await supabase
@@ -116,6 +125,14 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
         is_child: data.is_child,
         max_rating: data.max_rating,
         pin_hash,
+        bio: data.bio ?? '',
+        social_instagram: data.social_instagram ?? '',
+        social_tiktok: data.social_tiktok ?? '',
+        social_youtube: data.social_youtube ?? '',
+        social_x: data.social_x ?? '',
+        social_facebook: data.social_facebook ?? '',
+        preferred_genres: data.preferred_genres ?? [],
+        notify_new_films: data.notify_new_films ?? false,
       })
       .select()
       .maybeSingle();

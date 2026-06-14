@@ -824,26 +824,15 @@ export default function ProfileSelector({ onComplete }: ProfileSelectorProps) {
         is_child: data.is_child,
         max_rating: data.max_rating,
         pin: data.pin,
+        bio: data.bio ?? '',
+        social_instagram: data.social_instagram ?? '',
+        social_tiktok: data.social_tiktok ?? '',
+        social_youtube: data.social_youtube ?? '',
+        social_x: data.social_x ?? '',
+        social_facebook: data.social_facebook ?? '',
+        preferred_genres: data.preferred_genres ?? [],
+        notify_new_films: data.notify_new_films ?? false,
       });
-      // Update extended fields after creation
-      const { data: profiles } = await supabase
-        .from('xlshorts_profiles')
-        .select('id')
-        .eq('user_id', user?.id)
-        .order('created_at', { ascending: false })
-        .limit(1);
-      if (profiles?.[0]?.id) {
-        await supabase.from('xlshorts_profiles').update({
-          bio: data.bio ?? '',
-          social_instagram: data.social_instagram ?? '',
-          social_tiktok: data.social_tiktok ?? '',
-          social_youtube: data.social_youtube ?? '',
-          social_x: data.social_x ?? '',
-          social_facebook: data.social_facebook ?? '',
-          preferred_genres: data.preferred_genres ?? [],
-          notify_new_films: data.notify_new_films ?? false,
-        }).eq('id', profiles[0].id);
-      }
     }
   }
 
