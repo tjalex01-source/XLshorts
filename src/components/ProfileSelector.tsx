@@ -322,7 +322,7 @@ function AvatarPicker({
 
 type FormStep = 'basics' | 'controls' | 'interests' | 'social';
 
-interface ProfileFormProps {
+export interface ProfileFormProps {
   existing?: Profile;
   userId: string;
   profileId: string | null;
@@ -330,7 +330,7 @@ interface ProfileFormProps {
   onCancel: () => void;
 }
 
-function ProfileForm({ existing, userId, profileId, onSave, onCancel }: ProfileFormProps) {
+export function ProfileForm({ existing, userId, profileId, onSave, onCancel }: ProfileFormProps) {
   const [step, setStep] = useState<FormStep>('basics');
   const [name, setName] = useState(existing?.name ?? '');
   const [color, setColor] = useState(existing?.avatar_color ?? AVATAR_COLORS[0]);

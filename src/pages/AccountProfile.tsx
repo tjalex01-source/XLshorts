@@ -8,7 +8,7 @@ import {
 import { useAuth } from '../contexts/AuthContext';
 import { useProfile } from '../contexts/ProfileContext';
 import { supabase } from '../lib/supabase';
-import { ProfileAvatar, PRESET_AVATARS } from '../components/ProfileSelector';
+import { ProfileAvatar, PRESET_AVATARS, ProfileForm as ProfileFormFull } from '../components/ProfileSelector';
 import type { Profile } from '../types/database';
 
 function buildPinHash(pin: string): string {
@@ -446,130 +446,28 @@ const AVATAR_COLORS_CP = [
 ];
 
 function CreateProfileModal({ onClose }: { onClose: () => void }) {
-  const { createProfile } = useProfile();
-  const [name, setName] = useState('');
-  const [color, setColor] = useState(AVATAR_COLORS_CP[0]);
-  const [avatarIcon, setAvatarIcon] = useState<string | null>(null);
-  const [isChild, setIsChild] = useState(false);
-  const [pin, setPin] = useState('');
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
+  const { user } = useAuth();
+  const { createProfile, refreshProfiles } = useProfile();
 
-  const letter = name.trim()[0]?.toUpperCase() ?? '?';
-  const previewIcon = PRESET_AVATARS.find(a => a.id === avatarIcon);
-
-  async function handleSave() {
-    if (!name.trim()) { setError('Enter a profile name.'); return; }
-    if (pin && !/^\d{4}$/.test(pin)) { setError('PIN must be exactly 4 digits.'); return; }
-    setError('');
-    setSaving(true);
-    const { error: err } = await createProfile({
-      name: name.trim(),
-      avatar_color: color,
-      avatar_letter: letter,
-      is_child: isChild,
-      max_rating: '',
-      pin: pin || undefined,
-    });
-    setSaving(false);
-    if (err) { setError(err.message); return; }
+  async function handleSave(data: Parameters<typeof createProfile>[0]) {
+    await createProfile(data);
     onClose();
   }
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-      <div className="bg-[#141414] border border-white/10 rounded-2xl w-full max-w-sm p-6 my-auto">
-        <div className="flex items-center justify-between mb-5">
-          <h2 className="text-xl font-bold text-white">New Profile</h2>
-          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-full bg-white/8 hover:bg-white/15 text-neutral-400 hover:text-white transition-colors">
-            <X size={16} />
-          </button>
-        </div>
-
-        {/* Avatar preview */}
-        <div className="flex justify-center mb-4">
-          <div className="w-20 h-20 rounded-2xl flex items-center justify-center text-4xl shadow-lg" style={{ backgroundColor: color }}>
-            {previewIcon ? previewIcon.icon : <span className="text-3xl font-black text-black">{letter}</span>}
-          </div>
-        </div>
-
-        {/* Icon grid */}
-        <div className="grid grid-cols-9 gap-1 mb-3">
-          <button onClick={() => setAvatarIcon(null)} className={`aspect-square rounded-lg flex items-center justify-center transition-all ${!avatarIcon ? 'ring-2 ring-[#e8a020] bg-[#e8a020]/10' : 'bg-white/5 hover:bg-white/10'}`}>
-            <User size={13} className={!avatarIcon ? 'text-[#e8a020]' : 'text-neutral-400'} />
-          </button>
-          {PRESET_AVATARS.map(a => (
-            <button key={a.id} onClick={() => setAvatarIcon(a.id)} className={`aspect-square rounded-lg flex items-center justify-center text-base transition-all ${avatarIcon === a.id ? 'ring-2 ring-[#e8a020] bg-[#e8a020]/10' : 'bg-white/5 hover:bg-white/10'}`} title={a.label}>{a.icon}</button>
-          ))}
-        </div>
-
-        {/* Colors */}
-        <div className="flex gap-1.5 justify-center mb-5 flex-wrap">
-          {AVATAR_COLORS_CP.map(c => (
-            <button key={c} onClick={() => setColor(c)} className="w-6 h-6 rounded-full transition-transform hover:scale-110" style={{ backgroundColor: c, outline: color === c ? '2px solid white' : 'none', outlineOffset: 2 }} />
-          ))}
-        </div>
-
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-neutral-400 mb-1.5">Profile Name</label>
-            <input
-              type="text"
-              value={name}
-              onChange={e => setName(e.target.value)}
-              placeholder="e.g. Alex, Kids, Work..."
-              maxLength={20}
-              className="w-full px-4 py-3 bg-[#0a0a0a] border border-white/10 rounded-xl text-white placeholder-neutral-600 focus:outline-none focus:border-[#e8a020]/60 focus:ring-2 focus:ring-[#e8a020]/20 transition-all"
-            />
-          </div>
-
-          <div
-            className={`flex items-center justify-between px-4 py-3 rounded-xl border cursor-pointer transition-all ${isChild ? 'border-[#e8a020]/50 bg-[#e8a020]/5' : 'border-white/10 bg-white/3'}`}
-            onClick={() => setIsChild(v => !v)}
-          >
-            <div className="flex items-center gap-3">
-              <Shield size={16} className={isChild ? 'text-[#e8a020]' : 'text-neutral-500'} />
-              <div>
-                <span className="text-sm font-medium text-white">Child Profile</span>
-                <p className="text-xs text-neutral-500">Only shows child-safe content</p>
-              </div>
-            </div>
-            <div className={`w-9 h-5 rounded-full transition-colors flex items-center shrink-0 ${isChild ? 'bg-[#e8a020]' : 'bg-white/15'}`}>
-              <div className={`w-3.5 h-3.5 rounded-full bg-white mx-0.5 transition-transform ${isChild ? 'translate-x-4' : 'translate-x-0'}`} />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-neutral-400 mb-1.5 flex items-center gap-2">
-              <Lock size={13} /> Profile PIN <span className="text-neutral-600 font-normal">(optional)</span>
-            </label>
-            <input
-              type="password"
-              inputMode="numeric"
-              value={pin}
-              onChange={e => setPin(e.target.value.replace(/\D/g, '').slice(0, 4))}
-              placeholder="4-digit PIN"
-              maxLength={4}
-              className="w-full px-4 py-3 bg-[#0a0a0a] border border-white/10 rounded-xl text-white placeholder-neutral-600 focus:outline-none focus:border-[#e8a020]/60 focus:ring-2 focus:ring-[#e8a020]/20 transition-all tracking-widest"
-            />
-            <p className="text-xs text-neutral-600 mt-1">Require this PIN to switch to this profile</p>
-          </div>
-
-          {error && <p className="text-red-400 text-sm">{error}</p>}
-
-          <button
-            onClick={handleSave}
-            disabled={saving}
-            className="w-full py-3 rounded-xl bg-[#e8a020] hover:bg-[#d4911a] disabled:opacity-50 text-black font-bold transition-all flex items-center justify-center gap-2"
-          >
-            {saving && <Loader2 size={16} className="animate-spin" />}
-            Create Profile
-          </button>
-        </div>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 px-4 overflow-y-auto py-8">
+      <div className="w-full max-w-sm">
+        <ProfileFormFull
+          userId={user?.id ?? ''}
+          profileId={null}
+          onSave={handleSave}
+          onCancel={onClose}
+        />
       </div>
     </div>
   );
 }
+
 
 // ─────────────────────────────────────────────
 // Main Profile Page
