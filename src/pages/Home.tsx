@@ -82,9 +82,36 @@ export default function Home() {
 
       let films: Film[] = filmsRes.data ?? [];
 
-      // Filter to child-safe only when profile is a child profile
-      if (activeProfile?.is_child) {
-        films = films.filter(f => f.ok_for_children);
+      // Filter based on profile content settings
+      if (activeProfile) {
+        const p = activeProfile as any;
+        const maxTier = p.max_age_tier ?? 'adult';
+        const tierOrder = { family: 0, teen: 1, adult: 2 };
+
+        films = films.filter(f => {
+          const ff = f as any;
+          // Check age tier
+          const filmTierVal = tierOrder[ff.age_tier as keyof typeof tierOrder] ?? 1;
+          const maxTierVal = tierOrder[maxTier as keyof typeof tierOrder] ?? 2;
+          if (filmTierVal > maxTierVal) return false;
+          // Check specific flags
+          if (p.block_language_mild && ff.flag_language_mild) return false;
+          if (p.block_language_strong && ff.flag_language_strong) return false;
+          if (p.block_violence && ff.flag_violence) return false;
+          if (p.block_gore && ff.flag_gore) return false;
+          if (p.block_sexual_content && ff.flag_sexual_content) return false;
+          if (p.block_nudity && ff.flag_nudity) return false;
+          if (p.block_drug_use && ff.flag_drug_use) return false;
+          if (p.block_alcohol_tobacco && ff.flag_alcohol_tobacco) return false;
+          if (p.block_frightening && ff.flag_frightening) return false;
+          if (p.block_thematic_complexity && ff.flag_thematic_complexity) return false;
+          // Filter out admin-removed films
+          if (ff.admin_review_status === 'removed') return false;
+          return true;
+        });
+      } else {
+        // No profile — filter out removed films only
+        films = films.filter(f => (f as any).admin_review_status !== 'removed');
       }
 
       setSeriesList((seriesRes.data ?? []) as Series[]);

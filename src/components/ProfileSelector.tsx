@@ -338,7 +338,19 @@ export function ProfileForm({ existing, userId, profileId, onSave, onCancel }: P
   const [avatarUrl, setAvatarUrl] = useState<string | null>(existing?.avatar_url ?? null);
   const [bio, setBio] = useState(existing?.bio ?? '');
   const [isChild, setIsChild] = useState(existing?.is_child ?? false);
-  const [maxRating, setMaxRating] = useState(existing?.max_rating ?? 'R');
+  const [maxAgeTier, setMaxAgeTier] = useState<'family' | 'teen' | 'adult'>((existing as any)?.max_age_tier ?? 'adult');
+  const [blockFlags, setBlockFlags] = useState<Record<string, boolean>>({
+    language_mild: (existing as any)?.block_language_mild ?? false,
+    language_strong: (existing as any)?.block_language_strong ?? false,
+    violence: (existing as any)?.block_violence ?? false,
+    gore: (existing as any)?.block_gore ?? false,
+    sexual_content: (existing as any)?.block_sexual_content ?? false,
+    nudity: (existing as any)?.block_nudity ?? false,
+    drug_use: (existing as any)?.block_drug_use ?? false,
+    alcohol_tobacco: (existing as any)?.block_alcohol_tobacco ?? false,
+    frightening: (existing as any)?.block_frightening ?? false,
+    thematic_complexity: (existing as any)?.block_thematic_complexity ?? false,
+  });
   const [pin, setPin] = useState('');
   const [confirmPin, setConfirmPin] = useState('');
   const [enablePin, setEnablePin] = useState(!!existing?.pin_hash);
@@ -376,7 +388,18 @@ export function ProfileForm({ existing, userId, profileId, onSave, onCancel }: P
       avatar_icon: avatarIcon,
       avatar_url: avatarUrl,
       is_child: isChild,
-      max_rating: isChild ? (['R', 'NC-17'].includes(maxRating) ? 'PG-13' : maxRating) : maxRating,
+      max_rating: maxAgeTier,
+      max_age_tier: maxAgeTier,
+      block_language_mild: blockFlags.language_mild,
+      block_language_strong: blockFlags.language_strong,
+      block_violence: blockFlags.violence,
+      block_gore: blockFlags.gore,
+      block_sexual_content: blockFlags.sexual_content,
+      block_nudity: blockFlags.nudity,
+      block_drug_use: blockFlags.drug_use,
+      block_alcohol_tobacco: blockFlags.alcohol_tobacco,
+      block_frightening: blockFlags.frightening,
+      block_thematic_complexity: blockFlags.thematic_complexity,
       pin: enablePin && pin.length === 4 ? pin : undefined,
       bio: bio.trim(),
       social_instagram: instagram.trim(),
@@ -471,17 +494,18 @@ export function ProfileForm({ existing, userId, profileId, onSave, onCancel }: P
 
       {/* Step: Parental Controls */}
       {step === 'controls' && (
-        <div className="space-y-4">
-          {/* Child toggle */}
+        <div className="space-y-5">
+
+          {/* Child Profile Toggle */}
           <div
             className={`flex items-center justify-between px-4 py-3 rounded-xl border cursor-pointer transition-all ${isChild ? 'border-[#e8a020]/50 bg-[#e8a020]/5' : 'border-white/10 bg-white/3'}`}
-            onClick={() => setIsChild(v => !v)}
+            onClick={() => { setIsChild(v => !v); if (!isChild) setMaxAgeTier('family'); }}
           >
             <div className="flex items-center gap-3">
               <Shield size={18} className={isChild ? 'text-[#e8a020]' : 'text-neutral-500'} />
               <div>
                 <p className="text-sm font-medium text-white">Child Profile</p>
-                <p className="text-xs text-neutral-500">Restricts content by rating</p>
+                <p className="text-xs text-neutral-500">Applies content restrictions below</p>
               </div>
             </div>
             <div className={`w-10 h-6 rounded-full transition-colors duration-200 flex items-center ${isChild ? 'bg-[#e8a020]' : 'bg-white/15'}`}>
@@ -489,24 +513,55 @@ export function ProfileForm({ existing, userId, profileId, onSave, onCancel }: P
             </div>
           </div>
 
-          {/* Max rating */}
+          {/* Age Tier */}
           <div>
-            <label className="block text-sm font-medium text-neutral-400 mb-1.5">
-              Max Content Rating {isChild && <span className="text-[#e8a020] text-xs">(child limited to PG-13)</span>}
-            </label>
-            <div className="flex gap-2">
-              {CONTENT_RATINGS.filter(r => !isChild || !['R', 'NC-17'].includes(r)).map(r => (
+            <label className="block text-sm font-medium text-neutral-400 mb-2">Maximum Age Tier</label>
+            <div className="grid grid-cols-3 gap-2">
+              {(['family', 'teen', 'adult'] as const).map(tier => (
                 <button
-                  key={r}
-                  onClick={() => setMaxRating(r)}
-                  className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all ${
-                    maxRating === r
+                  key={tier}
+                  onClick={() => setMaxAgeTier(tier)}
+                  disabled={isChild && tier === 'adult'}
+                  className={`py-2.5 rounded-xl text-sm font-bold capitalize transition-all ${
+                    maxAgeTier === tier
                       ? 'bg-[#e8a020] text-black'
-                      : 'bg-white/8 text-neutral-400 hover:bg-white/15 hover:text-white border border-white/10'
+                      : 'bg-white/8 text-neutral-400 hover:bg-white/15 hover:text-white border border-white/10 disabled:opacity-30 disabled:cursor-not-allowed'
                   }`}
                 >
-                  {r}
+                  {tier === 'family' ? '👶 Family' : tier === 'teen' ? '🧑 Teen' : '🔞 Adult'}
                 </button>
+              ))}
+            </div>
+            <p className="text-xs text-neutral-600 mt-1.5">
+              {maxAgeTier === 'family' ? 'Only shows content suitable for all ages' : maxAgeTier === 'teen' ? 'Allows teen content, blocks adult material' : 'No age-based restrictions'}
+            </p>
+          </div>
+
+          {/* Specific Content Blocks */}
+          <div>
+            <label className="block text-sm font-medium text-neutral-400 mb-2">Also block these specific types</label>
+            <div className="space-y-1.5">
+              {[
+                { key: 'language_mild', label: 'Mild language' },
+                { key: 'language_strong', label: 'Strong language' },
+                { key: 'violence', label: 'Violence' },
+                { key: 'gore', label: 'Gore / graphic violence' },
+                { key: 'sexual_content', label: 'Sexual content' },
+                { key: 'nudity', label: 'Nudity' },
+                { key: 'drug_use', label: 'Drug use' },
+                { key: 'alcohol_tobacco', label: 'Alcohol & tobacco' },
+                { key: 'frightening', label: 'Frightening / intense scenes' },
+                { key: 'thematic_complexity', label: 'Mature themes (depression, abuse, etc.)' },
+              ].map(({ key, label }) => (
+                <label key={key} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 cursor-pointer">
+                  <div
+                    onClick={() => setBlockFlags(f => ({ ...f, [key]: !f[key] }))}
+                    className={`w-4 h-4 shrink-0 rounded flex items-center justify-center border transition-all cursor-pointer ${blockFlags[key] ? 'bg-[#e8a020] border-[#e8a020]' : 'border-white/30 bg-white/5 hover:border-white/50'}`}
+                  >
+                    {blockFlags[key] && <Check size={10} className="text-black" />}
+                  </div>
+                  <span className="text-sm text-neutral-300">{label}</span>
+                </label>
               ))}
             </div>
           </div>
@@ -563,7 +618,7 @@ export function ProfileForm({ existing, userId, profileId, onSave, onCancel }: P
                 <div className="flex items-start gap-2.5 mb-3">
                   <AlertTriangle size={15} className="text-yellow-400 shrink-0 mt-0.5" />
                   <p className="text-xs text-yellow-300/90 leading-relaxed">
-                    XLShorts does its best to separate content based on adult and child suitability. However, we rely on creators to be truthful when uploading their films. We cannot be held responsible if inaccurately labeled content slips through.
+                    XLShorts relies on creators to accurately label their content. We review flagged films and take action on violations, but we cannot guarantee all content is perfectly categorized.
                   </p>
                 </div>
                 <label className="flex items-start gap-2.5 cursor-pointer">
@@ -794,6 +849,17 @@ export default function ProfileSelector({ onComplete }: ProfileSelectorProps) {
       avatar_url: data.avatar_url ?? null,
       is_child: data.is_child,
       max_rating: data.max_rating,
+      max_age_tier: (data as any).max_age_tier ?? 'adult',
+      block_language_mild: (data as any).block_language_mild ?? false,
+      block_language_strong: (data as any).block_language_strong ?? false,
+      block_violence: (data as any).block_violence ?? false,
+      block_gore: (data as any).block_gore ?? false,
+      block_sexual_content: (data as any).block_sexual_content ?? false,
+      block_nudity: (data as any).block_nudity ?? false,
+      block_drug_use: (data as any).block_drug_use ?? false,
+      block_alcohol_tobacco: (data as any).block_alcohol_tobacco ?? false,
+      block_frightening: (data as any).block_frightening ?? false,
+      block_thematic_complexity: (data as any).block_thematic_complexity ?? false,
       bio: data.bio ?? '',
       social_instagram: data.social_instagram ?? '',
       social_tiktok: data.social_tiktok ?? '',
@@ -823,6 +889,17 @@ export default function ProfileSelector({ onComplete }: ProfileSelectorProps) {
         avatar_url: data.avatar_url ?? null,
         is_child: data.is_child,
         max_rating: data.max_rating,
+        max_age_tier: (data as any).max_age_tier ?? 'adult',
+        block_language_mild: (data as any).block_language_mild ?? false,
+        block_language_strong: (data as any).block_language_strong ?? false,
+        block_violence: (data as any).block_violence ?? false,
+        block_gore: (data as any).block_gore ?? false,
+        block_sexual_content: (data as any).block_sexual_content ?? false,
+        block_nudity: (data as any).block_nudity ?? false,
+        block_drug_use: (data as any).block_drug_use ?? false,
+        block_alcohol_tobacco: (data as any).block_alcohol_tobacco ?? false,
+        block_frightening: (data as any).block_frightening ?? false,
+        block_thematic_complexity: (data as any).block_thematic_complexity ?? false,
         pin: data.pin,
         bio: data.bio ?? '',
         social_instagram: data.social_instagram ?? '',
