@@ -1242,6 +1242,19 @@ function FilmUploadForm({ userId, film, contentType, lockedSeriesId, lockedSeaso
       content_has_violence: data.content_has_violence, content_has_drug_use: data.content_has_drug_use,
       content_has_adult_themes: data.content_has_adult_themes, content_has_flashing_lights: data.content_has_flashing_lights,
       ok_for_children: data.ok_for_children, age_recommendation: data.age_recommendation,
+      // New content flags mapped to database columns
+      age_tier: data.age_recommendation === 'family' ? 'family' : data.age_recommendation === 'teen' ? 'teen' : 'adult',
+      flag_language_mild: data.content_has_language,
+      flag_language_strong: data.content_has_language,
+      flag_violence: data.content_has_violence,
+      flag_gore: data.content_has_violence,
+      flag_sexual_content: data.content_has_nudity,
+      flag_nudity: data.content_has_nudity,
+      flag_drug_use: data.content_has_drug_use,
+      flag_alcohol_tobacco: data.content_has_drug_use,
+      flag_frightening: data.content_has_flashing_lights,
+      flag_thematic_complexity: data.content_has_adult_themes,
+      admin_review_status: 'pending_review',
       status: asDraft ? 'draft' : 'pending', uploaded_by: userId,
       content_type: contentType,
     };
@@ -1573,27 +1586,55 @@ function FilmUploadForm({ userId, film, contentType, lockedSeriesId, lockedSeaso
           </section>
         )}
 
-        {/* ── CONTENT RATING ── */}
+        {/* Content Rating */}
         {activeSection === 'content' && (
           <section className="bg-[#141414] border border-white/8 rounded-2xl p-6 space-y-6">
-            <div className="bg-yellow-500/8 border border-yellow-500/20 rounded-xl p-4 flex items-start gap-3">
-              <AlertCircle size={16} className="text-yellow-400 shrink-0 mt-0.5" />
-              <p className="text-xs text-yellow-300/90 leading-relaxed">
-                You are required to accurately describe your content. Providing false or misleading content descriptors is a violation of the Creator Terms and may result in removal from the platform.
-              </p>
+
+            <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 flex items-start gap-3">
+              <AlertCircle size={16} className="text-red-400 shrink-0 mt-0.5" />
+              <div>
+                <p className="text-sm font-bold text-red-400 mb-1">Content Accuracy Required</p>
+                <p className="text-xs text-red-300/90 leading-relaxed">
+                  You are required to accurately describe the content of your film. Misrepresenting content — including marking adult material as family-safe — is a violation of our Creator Terms and <strong>may result in your film being immediately removed and your account permanently banned.</strong> XLShorts reviews flagged content and takes these reports seriously.
+                </p>
+              </div>
             </div>
+
             <div>
-              <h3 className="text-sm font-semibold text-neutral-300 mb-3">Content Flags</h3>
-              <div className="grid sm:grid-cols-2 gap-3">
+              <h3 className="text-sm font-semibold text-neutral-300 mb-3">Age Tier</h3>
+              <div className="grid grid-cols-3 gap-2">
                 {([
-                  ['content_has_language', 'Strong / Foul Language'],
-                  ['content_has_nudity', 'Nudity or Sexual Content'],
-                  ['content_has_violence', 'Violence or Gore'],
-                  ['content_has_drug_use', 'Drug or Alcohol Use'],
-                  ['content_has_adult_themes', 'Adult Themes / Mature Content'],
-                  ['content_has_flashing_lights', 'Flashing Lights / Strobing'],
+                  ['family', '👶 Family', 'No adult content of any kind'],
+                  ['teen', '🧑 Teen', 'Mild content only'],
+                  ['adult', '🔞 Adult', 'Contains adult content'],
+                ] as const).map(([val, label, desc]) => (
+                  <button key={val} type="button"
+                    onClick={() => set('age_recommendation', val)}
+                    className={`py-3 px-2 rounded-xl text-sm font-bold transition-all border text-center ${data.age_recommendation === val ? 'bg-[#e8a020] text-black border-[#e8a020]' : 'text-neutral-500 border-white/10 bg-white/3 hover:text-white hover:border-white/20'}`}>
+                    <div>{label}</div>
+                    <div className={`text-xs font-normal mt-1 ${data.age_recommendation === val ? 'text-black/70' : 'text-neutral-600'}`}>{desc}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-sm font-semibold text-neutral-300 mb-1">Specific Content — check all that apply</h3>
+              <p className="text-xs text-neutral-600 mb-3">Check every element your film contains, even if you selected Family or Teen above.</p>
+              <div className="grid sm:grid-cols-2 gap-2">
+                {([
+                  ['content_has_language', 'Mild language'],
+                  ['content_has_language', 'Strong / foul language'],
+                  ['content_has_violence', 'Violence'],
+                  ['content_has_violence', 'Gore / graphic violence'],
+                  ['content_has_nudity', 'Sexual content'],
+                  ['content_has_nudity', 'Nudity'],
+                  ['content_has_drug_use', 'Drug use'],
+                  ['content_has_drug_use', 'Alcohol & tobacco'],
+                  ['content_has_flashing_lights', 'Frightening / intense scenes'],
+                  ['content_has_adult_themes', 'Mature themes (depression, abuse, suicide, etc.)'],
                 ] as [keyof UploadData, string][]).map(([key, label]) => (
-                  <label key={key} className="flex items-center gap-3 p-3 bg-[#0a0a0a] rounded-xl border border-white/8 cursor-pointer group hover:border-white/15 transition-all">
+                  <label key={label} className="flex items-center gap-3 p-3 bg-[#0a0a0a] rounded-xl border border-white/8 cursor-pointer group hover:border-white/15 transition-all">
                     <div onClick={() => set(key, !data[key])}
                       className={`w-5 h-5 shrink-0 rounded flex items-center justify-center border transition-all ${data[key] ? 'bg-[#e8a020] border-[#e8a020]' : 'border-white/20 bg-white/5 group-hover:border-white/40'}`}>
                       {data[key] && <Check size={11} className="text-black" />}
@@ -1603,49 +1644,9 @@ function FilmUploadForm({ userId, film, contentType, lockedSeriesId, lockedSeaso
                 ))}
               </div>
             </div>
-            <div>
-              <h3 className="text-sm font-semibold text-neutral-300 mb-3">Age Recommendation</h3>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                {([
-                  ['all-ages', 'All Ages', 'text-green-400'],
-                  ['teen', 'Teen (13+)', 'text-blue-400'],
-                  ['mature', 'Mature (17+)', 'text-orange-400'],
-                  ['adult', 'Adult (18+)', 'text-red-400'],
-                ] as [Film['age_recommendation'], string, string][]).map(([val, label, color]) => (
-                  <button key={val} type="button" onClick={() => set('age_recommendation', data.age_recommendation === val ? '' : val)}
-                    className={`py-3 rounded-xl text-sm font-bold transition-all border ${data.age_recommendation === val ? `${color} bg-white/10 border-current` : 'text-neutral-500 border-white/10 bg-white/3 hover:text-white hover:border-white/20'}`}>
-                    {label}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div>
-              <h3 className="text-sm font-semibold text-neutral-300 mb-3">Suitable for Children</h3>
-              <div onClick={() => set('ok_for_children', !data.ok_for_children)}
-                className={`flex items-center justify-between px-4 py-3.5 rounded-xl border cursor-pointer transition-all ${data.ok_for_children ? 'border-green-500/40 bg-green-500/8' : 'border-white/10 bg-white/3 hover:border-white/20'}`}>
-                <div>
-                  <p className="text-sm font-medium text-white">Okay for Children</p>
-                  <p className="text-xs text-neutral-500 mt-0.5">This film contains no content inappropriate for children</p>
-                </div>
-                <div className={`w-11 h-6 rounded-full transition-colors duration-200 flex items-center px-1 ${data.ok_for_children ? 'bg-green-500' : 'bg-white/15'}`}>
-                  <div className={`w-4 h-4 rounded-full bg-white transition-transform duration-200 ${data.ok_for_children ? 'translate-x-5' : 'translate-x-0'}`} />
-                </div>
-              </div>
-            </div>
-            <div>
-              <h3 className="text-sm font-semibold text-neutral-300 mb-3">Content Rating (MPAA-style)</h3>
-              <div className="flex gap-2 flex-wrap">
-                {CONTENT_RATINGS.map(r => (
-                  <button key={r} type="button" onClick={() => set('rating', r)}
-                    className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${data.rating === r ? 'bg-[#e8a020] text-black' : 'bg-white/8 text-neutral-400 hover:bg-white/15 hover:text-white border border-white/10'}`}>
-                    {r}
-                  </button>
-                ))}
-              </div>
-            </div>
+
           </section>
         )}
-
         {error && (
           <div className="flex items-start gap-2.5 px-4 py-3 bg-red-500/10 border border-red-500/30 rounded-xl">
             <AlertCircle size={16} className="text-red-400 shrink-0 mt-0.5" />
