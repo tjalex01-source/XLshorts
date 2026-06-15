@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import {
   User, Edit2, Shield, Lock, Bell, Instagram, Youtube, Twitter, Music2,
   Clapperboard, ChevronRight, Loader2, Check, AlertCircle, Clock,
-  Send, LogOut, Plus, X, RefreshCw, Camera
+  Send, LogOut, Plus, X, RefreshCw, Camera, Eye, EyeOff
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useProfile } from '../contexts/ProfileContext';
@@ -216,6 +216,85 @@ function CreateProfileModal({ onClose }: { onClose: () => void }) {
 // Main Profile Page
 // ─────────────────────────────────────────────
 
+function ChangePasswordSection() {
+  const [current, setCurrent] = useState('');
+  const [next, setNext] = useState('');
+  const [confirm, setConfirm] = useState('');
+  const [showCurrent, setShowCurrent] = useState(false);
+  const [showNext, setShowNext] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+
+  async function handleChange(e: React.FormEvent) {
+    e.preventDefault();
+    setError(''); setSuccess('');
+    if (!current || !next || !confirm) { setError('All fields are required.'); return; }
+    if (next.length < 8) { setError('New password must be at least 8 characters.'); return; }
+    if (next !== confirm) { setError('New passwords do not match.'); return; }
+
+    setSaving(true);
+    // Re-authenticate with current password first
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user?.email) { setError('Could not verify account.'); setSaving(false); return; }
+
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email: user.email,
+      password: current,
+    });
+    if (signInError) { setError('Current password is incorrect.'); setSaving(false); return; }
+
+    const { error: updateError } = await supabase.auth.updateUser({ password: next });
+    if (updateError) { setError(updateError.message); setSaving(false); return; }
+
+    setSuccess('Password updated successfully.');
+    setCurrent(''); setNext(''); setConfirm('');
+    setSaving(false);
+  }
+
+  const inputCls = "w-full px-3 py-2.5 bg-[#0a0a0a] border border-white/10 rounded-xl text-white text-sm placeholder-neutral-600 focus:outline-none focus:border-[#e8a020]/60 transition-all pr-10";
+
+  return (
+    <div className="p-5 bg-white/5 border border-white/8 rounded-2xl">
+      <h3 className="text-base font-bold text-white mb-4">Change Password</h3>
+      <form onSubmit={handleChange} className="space-y-3">
+        {[
+          { label: 'Current Password', value: current, set: setCurrent, show: showCurrent, setShow: setShowCurrent },
+          { label: 'New Password', value: next, set: setNext, show: showNext, setShow: setShowNext },
+          { label: 'Confirm New Password', value: confirm, set: setConfirm, show: showConfirm, setShow: setShowConfirm },
+        ].map(({ label, value, set, show, setShow }) => (
+          <div key={label}>
+            <label className="block text-xs text-neutral-500 mb-1.5">{label}</label>
+            <div className="relative">
+              <input
+                type={show ? 'text' : 'password'}
+                value={value}
+                onChange={e => set(e.target.value)}
+                placeholder={label === 'Current Password' ? 'Enter current password' : 'At least 8 characters'}
+                className={inputCls}
+              />
+              <button type="button" onClick={() => setShow((v: boolean) => !v)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-white transition-colors">
+                {show ? <EyeOff size={14} /> : <Eye size={14} />}
+              </button>
+            </div>
+          </div>
+        ))}
+
+        {error && <p className="text-red-400 text-xs">{error}</p>}
+        {success && <p className="text-green-400 text-xs">{success}</p>}
+
+        <button type="submit" disabled={saving}
+          className="w-full py-2.5 bg-[#e8a020] hover:bg-[#d4911a] disabled:opacity-50 text-black font-bold text-sm rounded-xl transition-all flex items-center justify-center gap-2">
+          {saving && <Loader2 size={14} className="animate-spin" />}
+          Update Password
+        </button>
+      </form>
+    </div>
+  );
+}
+
 export default function AccountProfile() {
   const { user, signOut } = useAuth();
   const { profiles, activeProfile, setActiveProfile, deleteProfile, loadingProfiles } = useProfile();
@@ -396,6 +475,8 @@ export default function AccountProfile() {
                 </div>
               </div>
             </div>
+
+            <ChangePasswordSection />
 
             <button
               onClick={signOut}
