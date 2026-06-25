@@ -1059,15 +1059,19 @@ function UsersTab({ currentUserId }: { currentUserId: string }) {
   async function load() {
     setLoading(true);
     const session = (await supabase.auth.getSession()).data.session;
-    const [usersRes, { data: rolesData }] = await Promise.all([
-      fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-get-users`,
-        { headers: { Authorization: `Bearer ${session?.access_token ?? ''}`, 'Content-Type': 'application/json' } }
-      ).then(r => r.json()),
-      supabase.from('user_roles').select('*').order('granted_at', { ascending: false }),
-    ]);
-    setUsers((Array.isArray(usersRes) ? usersRes : []) as UserWithRoles[]);
-    setRoles(rolesData ?? []);
+    try {
+      const [usersRes, { data: rolesData }] = await Promise.all([
+        fetch(
+          `https://api.xlcoverage.com/api/admin-get-users`,
+          { headers: { Authorization: `Bearer ${session?.access_token ?? ''}`, 'Content-Type': 'application/json' } }
+        ).then(r => r.json()).catch(() => []),
+        supabase.from('user_roles').select('*').order('granted_at', { ascending: false }),
+      ]);
+      setUsers((Array.isArray(usersRes) ? usersRes : []) as UserWithRoles[]);
+      setRoles(rolesData ?? []);
+    } catch (e) {
+      console.error('Admin load failed:', e);
+    }
     setLoading(false);
   }
 
