@@ -192,7 +192,7 @@ export interface Series {
   language: string;
   country_of_origin: string;
   status: 'draft' | 'pending' | 'published' | 'rejected';
-  uploaded_by: string | null;
+  creator_id: string | null;
   rejection_reason: string | null;
   created_at: string;
   updated_at: string;

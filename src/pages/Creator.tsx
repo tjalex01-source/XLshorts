@@ -1211,13 +1211,17 @@ function FilmUploadForm({ userId, film, contentType, lockedSeriesId, lockedSeaso
 
     if (uploadMode === 'file' && videoFile) {
       setUploading(true);
-      const path = `${userId}/${Date.now()}_${videoFile.name}`;
+      const safeName = videoFile.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+      const path = `${userId}/${Date.now()}_${safeName}`;
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('film-uploads').upload(path, videoFile, { upsert: false });
       setUploading(false);
       if (uploadError) { setError(`Video upload failed: ${uploadError.message}`); setSaving(false); return; }
       videoStoragePath = uploadData.path;
-      videoUrl = '';
+      // The Player streams from video_url, so point it at the uploaded file's
+      // public URL. (film-uploads must be a public bucket.)
+      const { data: pub } = supabase.storage.from('film-uploads').getPublicUrl(uploadData.path);
+      videoUrl = pub.publicUrl;
     }
 
     if (thumbnailFile) {
