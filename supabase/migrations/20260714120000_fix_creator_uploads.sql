@@ -155,10 +155,16 @@ JOIN public.genres p ON p.slug = v.parent_slug
 ON CONFLICT (slug) DO NOTHING;
 
 -- ─────────────────────────────────────────────────────────────
--- 5. Make the film-uploads bucket public so the <video> player
---    (which streams from films.video_url) can load uploaded files.
+-- 5. Create the film-uploads / film-thumbnails buckets (they never
+--    existed — only `avatars` did, so every file upload failed with
+--    "Bucket not found"). Public so the <video> player, which streams
+--    from films.video_url, can load uploaded files.
 -- ─────────────────────────────────────────────────────────────
-UPDATE storage.buckets SET public = true WHERE id IN ('film-uploads', 'film-thumbnails');
+INSERT INTO storage.buckets (id, name, public, file_size_limit) VALUES
+  ('film-uploads',    'film-uploads',    true, 5368709120),  -- 5 GB video
+  ('film-thumbnails', 'film-thumbnails', true, 52428800)     -- 50 MB images
+ON CONFLICT (id) DO UPDATE
+  SET public = excluded.public, file_size_limit = excluded.file_size_limit;
 
 -- Storage write policies: a creator may upload into their own uid folder.
 DROP POLICY IF EXISTS "xlshorts_film_uploads_insert" ON storage.objects;
