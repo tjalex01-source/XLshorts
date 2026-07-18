@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { supabase } from '../lib/supabase';
+import { supabase, supabaseUrl } from '../lib/supabase';
+import * as tus from 'tus-js-client';
 import { useAuth } from '../contexts/AuthContext';
 import type { Film, Category, Genre } from '../types/database';
 import { CONTENT_RATINGS } from '../types/database';
@@ -1053,6 +1054,50 @@ interface FilmUploadFormProps {
   onCancel: () => void;
 }
 
+// Resumable (TUS) upload to Supabase Storage. Unlike the standard one-shot
+// upload, this chunks the file, survives dropped connections (auto-resume),
+// and handles multi-GB videos. Supabase requires exactly 6MB chunks and the
+// signed-in user's access token.
+async function uploadResumable(
+  bucket: string,
+  objectName: string,
+  file: File,
+  onProgress: (pct: number) => void,
+): Promise<void> {
+  const { data: { session } } = await supabase.auth.getSession();
+  const accessToken = session?.access_token;
+  if (!accessToken) throw new Error('Your session expired — please sign in again.');
+
+  await new Promise<void>((resolve, reject) => {
+    const upload = new tus.Upload(file, {
+      endpoint: `${supabaseUrl}/storage/v1/upload/resumable`,
+      retryDelays: [0, 3000, 5000, 10000, 20000],
+      headers: {
+        authorization: `Bearer ${accessToken}`,
+        'x-upsert': 'true',
+      },
+      uploadDataDuringCreation: true,
+      removeFingerprintOnSuccess: true,
+      chunkSize: 6 * 1024 * 1024, // Supabase requires exactly 6MB chunks
+      metadata: {
+        bucketName: bucket,
+        objectName,
+        contentType: file.type || 'video/mp4',
+        cacheControl: '3600',
+      },
+      onError: reject,
+      onProgress: (sent, total) => onProgress(total ? Math.round((sent / total) * 100) : 0),
+      onSuccess: () => resolve(),
+    });
+    upload.findPreviousUploads()
+      .then((prev) => {
+        if (prev.length) upload.resumeFromPreviousUpload(prev[0]);
+        upload.start();
+      })
+      .catch(reject);
+  });
+}
+
 function FilmUploadForm({ userId, film, contentType, lockedSeriesId, lockedSeasonNumber, onSave, onCancel }: FilmUploadFormProps) {
   const [data, setData] = useState<UploadData>(() => {
     if (film) {
@@ -1098,6 +1143,7 @@ function FilmUploadForm({ userId, film, contentType, lockedSeriesId, lockedSeaso
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [uploadPct, setUploadPct] = useState(0);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [editingFilmId, setEditingFilmId] = useState<string | null>(film?.id ?? null);
@@ -1211,16 +1257,22 @@ function FilmUploadForm({ userId, film, contentType, lockedSeriesId, lockedSeaso
 
     if (uploadMode === 'file' && videoFile) {
       setUploading(true);
+      setUploadPct(0);
       const safeName = videoFile.name.replace(/[^a-zA-Z0-9._-]/g, '_');
       const path = `${userId}/${Date.now()}_${safeName}`;
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('film-uploads').upload(path, videoFile, { upsert: false });
+      try {
+        await uploadResumable('film-uploads', path, videoFile, setUploadPct);
+      } catch (err) {
+        setUploading(false);
+        setError(`Video upload failed: ${err instanceof Error ? err.message : 'Please try again.'}`);
+        setSaving(false);
+        return;
+      }
       setUploading(false);
-      if (uploadError) { setError(`Video upload failed: ${uploadError.message}`); setSaving(false); return; }
-      videoStoragePath = uploadData.path;
+      videoStoragePath = path;
       // The Player streams from video_url, so point it at the uploaded file's
-      // public URL. (film-uploads must be a public bucket.)
-      const { data: pub } = supabase.storage.from('film-uploads').getPublicUrl(uploadData.path);
+      // public URL. (film-uploads is a public bucket.)
+      const { data: pub } = supabase.storage.from('film-uploads').getPublicUrl(path);
       videoUrl = pub.publicUrl;
     }
 
@@ -1672,13 +1724,25 @@ function FilmUploadForm({ userId, film, contentType, lockedSeriesId, lockedSeaso
           </div>
         )}
 
+        {uploading && (
+          <div className="mb-3">
+            <div className="flex items-center justify-between text-xs text-neutral-400 mb-1">
+              <span>Uploading video…</span><span>{uploadPct}%</span>
+            </div>
+            <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+              <div className="h-full bg-[#e8a020] transition-all duration-300" style={{ width: `${uploadPct}%` }} />
+            </div>
+            <p className="text-[11px] text-neutral-600 mt-1">Large files can take a while. Keep this tab open — if the connection drops, the upload resumes automatically.</p>
+          </div>
+        )}
+
         <div className="flex gap-3">
           <button type="button" onClick={onCancel} className="px-5 py-3 bg-white/8 hover:bg-white/15 border border-white/10 text-white font-semibold rounded-xl transition-all">Cancel</button>
           <button type="button" onClick={() => handleSave(true)} disabled={saving} className="px-5 py-3 bg-white/8 hover:bg-white/15 border border-white/10 text-neutral-300 hover:text-white font-semibold rounded-xl transition-all">Save as Draft</button>
           <button type="button" onClick={() => handleSave(false)} disabled={saving || uploading}
             className="flex-1 flex items-center justify-center gap-2 py-3 bg-[#e8a020] hover:bg-[#d4911a] disabled:opacity-50 text-black font-bold rounded-xl transition-all">
             {(saving || uploading) && <Loader2 size={16} className="animate-spin" />}
-            {uploading ? 'Uploading...' : film ? 'Submit Changes' : 'Submit for Review'}
+            {uploading ? `Uploading… ${uploadPct}%` : film ? 'Submit Changes' : 'Submit for Review'}
           </button>
         </div>
       </div>
