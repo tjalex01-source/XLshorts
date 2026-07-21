@@ -82,7 +82,7 @@ export default function Navbar() {
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
         scrolled
-          ? 'bg-[#0a0a0a]/98 backdrop-blur-md shadow-2xl shadow-black/50'
+          ? 'bg-[#0a0a0a]/95 backdrop-blur-md shadow-2xl shadow-black/50'
           : 'bg-gradient-to-b from-black/80 via-black/40 to-transparent'
       }`}
     >
@@ -269,7 +269,7 @@ export default function Navbar() {
 
       {/* Mobile nav */}
       {mobileOpen && user && (
-        <div className="md:hidden bg-[#0a0a0a]/98 border-t border-white/10 px-4 py-4 flex flex-col gap-1">
+        <div className="md:hidden bg-[#0a0a0a] border-t border-white/10 shadow-2xl shadow-black/50 px-4 py-4 flex flex-col gap-1">
           {navLinks.map(({ to, label, icon: Icon }) => (
             <Link
               key={to}

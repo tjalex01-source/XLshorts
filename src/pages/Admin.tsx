@@ -556,7 +556,8 @@ function FilmsTab() {
             const isReviewing = reviewingId === film.id;
             return (
               <div key={film.id} className={`p-4 bg-[#141414] border rounded-xl ${ff.admin_review_status === 'pending_review' ? 'border-yellow-500/30' : 'border-white/8'}`}>
-                <div className="flex items-start gap-4">
+                <div className="flex flex-col sm:flex-row sm:items-start gap-3">
+                  <div className="flex items-start gap-3 flex-1 min-w-0">
                   {film.thumbnail_url && (
                     <img src={film.thumbnail_url} alt={film.title} className="w-16 h-11 object-cover rounded-lg shrink-0" />
                   )}
@@ -585,8 +586,9 @@ function FilmsTab() {
                     {ff.admin_review_note && (
                       <p className="text-xs text-neutral-500 mt-1 italic">Note: {ff.admin_review_note}</p>
                     )}
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2 shrink-0 flex-wrap justify-end">
+                  <div className="flex items-center gap-2 flex-wrap sm:justify-end sm:shrink-0">
                     {ff.admin_review_status === 'pending_review' && !isReviewing && (
                       <>
                         <button onClick={() => setReviewStatus(film.id, 'approved')}
