@@ -42,7 +42,7 @@ export default function HeroSection({ films, watchlistIds, onToggleWatchlist }: 
       <div className={`absolute inset-0 transition-opacity duration-500 ${transitioning ? 'opacity-0' : 'opacity-100'}`}>
         <img
           key={film.id}
-          src={film.backdrop_url}
+          src={film.backdrop_url || film.thumbnail_url}
           alt={film.title}
           className="w-full h-full object-cover object-center"
         />
