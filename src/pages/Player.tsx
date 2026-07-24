@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
+import Hls from 'hls.js';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { useProfile } from '../contexts/ProfileContext';
@@ -92,6 +93,25 @@ export default function Player() {
       }
     });
   }, [id]);
+
+  // Attach the video source. Cloudflare Stream serves adaptive HLS (.m3u8),
+  // which needs hls.js on browsers without native HLS (Chrome/Firefox); Safari
+  // plays HLS natively. Existing Supabase/external mp4 URLs load directly.
+  useEffect(() => {
+    const v = videoRef.current;
+    const url = film?.video_url;
+    if (!v || !url) return;
+    const isHls = url.includes('.m3u8');
+    const nativeHls = v.canPlayType('application/vnd.apple.mpegurl');
+    if (isHls && !nativeHls && Hls.isSupported()) {
+      const hls = new Hls({ enableWorker: true });
+      hls.loadSource(url);
+      hls.attachMedia(v);
+      return () => hls.destroy();
+    }
+    v.src = url;
+    return () => { v.removeAttribute('src'); v.load(); };
+  }, [film?.video_url]);
 
   useEffect(() => {
     if (phase === 'film') {
@@ -197,7 +217,6 @@ export default function Player() {
       {film && (
         <video
           ref={videoRef}
-          src={film.video_url}
           className={`w-full h-full object-contain ${inAd ? 'opacity-0 pointer-events-none' : ''}`}
           onLoadedMetadata={e => setDuration((e.target as HTMLVideoElement).duration)}
           onTimeUpdate={onTimeUpdate}

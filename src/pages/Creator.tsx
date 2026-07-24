@@ -1,7 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { supabase, supabaseUrl } from '../lib/supabase';
+import { supabase } from '../lib/supabase';
 import * as tus from 'tus-js-client';
+
+// Shared backend (creates one-time Cloudflare Stream upload URLs) + the Stream
+// customer subdomain used to build playback URLs.
+const API_BASE = 'https://api.xlcoverage.com';
+const CF_CUSTOMER_CODE = 'xci8kety2wyxb75i';
 import { useAuth } from '../contexts/AuthContext';
 import type { Film, Category, Genre } from '../types/database';
 import { CONTENT_RATINGS } from '../types/database';
@@ -1054,48 +1059,43 @@ interface FilmUploadFormProps {
   onCancel: () => void;
 }
 
-// Resumable (TUS) upload to Supabase Storage. Unlike the standard one-shot
-// upload, this chunks the file, survives dropped connections (auto-resume),
-// and handles multi-GB videos. Supabase requires exactly 6MB chunks and the
-// signed-in user's access token.
-async function uploadResumable(
-  bucket: string,
-  objectName: string,
-  file: File,
-  onProgress: (pct: number) => void,
-): Promise<void> {
+// Upload a video to Cloudflare Stream via resumable tus. Our backend mints a
+// one-time upload URL (keeping the Stream token server-side); the browser then
+// uploads straight to Cloudflare — chunked, auto-resuming, multi-GB safe.
+// Returns the Stream video uid.
+async function uploadToStream(file: File, onProgress: (pct: number) => void): Promise<string> {
   const { data: { session } } = await supabase.auth.getSession();
   const accessToken = session?.access_token;
   if (!accessToken) throw new Error('Your session expired — please sign in again.');
 
+  // 1) ask our backend for a one-time Cloudflare upload URL
+  const resp = await fetch(`${API_BASE}/api/stream-create-upload`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
+    body: JSON.stringify({ uploadLength: file.size, name: file.name }),
+  });
+  if (!resp.ok) {
+    const e = await resp.json().catch(() => ({} as { error?: string }));
+    throw new Error(e.error || `Could not start the upload (${resp.status}).`);
+  }
+  const { uploadURL, uid } = await resp.json();
+  if (!uploadURL || !uid) throw new Error('Upload service did not return an upload URL.');
+
+  // 2) resumable upload straight to Cloudflare (uploadUrl was created server-side)
   await new Promise<void>((resolve, reject) => {
     const upload = new tus.Upload(file, {
-      endpoint: `${supabaseUrl}/storage/v1/upload/resumable`,
+      uploadUrl: uploadURL,
+      chunkSize: 52428800, // 50MB — Cloudflare requires >=5MB, multiple of 256KiB
       retryDelays: [0, 3000, 5000, 10000, 20000],
-      headers: {
-        authorization: `Bearer ${accessToken}`,
-        'x-upsert': 'true',
-      },
-      uploadDataDuringCreation: true,
-      removeFingerprintOnSuccess: true,
-      chunkSize: 6 * 1024 * 1024, // Supabase requires exactly 6MB chunks
-      metadata: {
-        bucketName: bucket,
-        objectName,
-        contentType: file.type || 'video/mp4',
-        cacheControl: '3600',
-      },
+      metadata: { name: file.name, filetype: file.type },
       onError: reject,
       onProgress: (sent, total) => onProgress(total ? Math.round((sent / total) * 100) : 0),
       onSuccess: () => resolve(),
     });
-    upload.findPreviousUploads()
-      .then((prev) => {
-        if (prev.length) upload.resumeFromPreviousUpload(prev[0]);
-        upload.start();
-      })
-      .catch(reject);
+    upload.start();
   });
+
+  return uid as string;
 }
 
 function FilmUploadForm({ userId, film, contentType, lockedSeriesId, lockedSeasonNumber, onSave, onCancel }: FilmUploadFormProps) {
@@ -1258,10 +1258,9 @@ function FilmUploadForm({ userId, film, contentType, lockedSeriesId, lockedSeaso
     if (uploadMode === 'file' && videoFile) {
       setUploading(true);
       setUploadPct(0);
-      const safeName = videoFile.name.replace(/[^a-zA-Z0-9._-]/g, '_');
-      const path = `${userId}/${Date.now()}_${safeName}`;
+      let streamUid: string;
       try {
-        await uploadResumable('film-uploads', path, videoFile, setUploadPct);
+        streamUid = await uploadToStream(videoFile, setUploadPct);
       } catch (err) {
         setUploading(false);
         setError(`Video upload failed: ${err instanceof Error ? err.message : 'Please try again.'}`);
@@ -1269,11 +1268,10 @@ function FilmUploadForm({ userId, film, contentType, lockedSeriesId, lockedSeaso
         return;
       }
       setUploading(false);
-      videoStoragePath = path;
-      // The Player streams from video_url, so point it at the uploaded file's
-      // public URL. (film-uploads is a public bucket.)
-      const { data: pub } = supabase.storage.from('film-uploads').getPublicUrl(path);
-      videoUrl = pub.publicUrl;
+      // Cloudflare Stream: keep the video id, and point video_url at the
+      // adaptive HLS manifest the Player streams from.
+      videoStoragePath = `stream:${streamUid}`;
+      videoUrl = `https://customer-${CF_CUSTOMER_CODE}.cloudflarestream.com/${streamUid}/manifest/video.m3u8`;
     }
 
     if (thumbnailFile) {
