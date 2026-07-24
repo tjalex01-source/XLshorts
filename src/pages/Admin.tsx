@@ -417,8 +417,27 @@ function FilmsTab() {
     setLoading(false);
   }
 
+  // When an episode goes live, publish its parent series too (and seed the
+  // series poster from the episode if it has none). Otherwise series stay
+  // 'pending' forever and never appear anywhere, since there's no separate
+  // series-approval step.
+  async function ensureSeriesPublished(filmId: string) {
+    const { data: f } = await supabase.from('films')
+      .select('content_type, series_id, thumbnail_url, backdrop_url').eq('id', filmId).maybeSingle();
+    const ep = f as { content_type?: string; series_id?: string; thumbnail_url?: string; backdrop_url?: string } | null;
+    if (ep?.content_type !== 'episode' || !ep?.series_id) return;
+    const { data: s } = await supabase.from('series')
+      .select('thumbnail_url, backdrop_url').eq('id', ep.series_id).maybeSingle();
+    const cur = s as { thumbnail_url?: string; backdrop_url?: string } | null;
+    const patch: Record<string, unknown> = { status: 'published' };
+    if (cur && !cur.thumbnail_url && ep.thumbnail_url) patch.thumbnail_url = ep.thumbnail_url;
+    if (cur && !cur.backdrop_url && ep.backdrop_url) patch.backdrop_url = ep.backdrop_url;
+    await supabase.from('series').update(patch).eq('id', ep.series_id);
+  }
+
   async function setStatus(id: string, status: Film['status'], reason?: string) {
     await supabase.from('films').update({ status, rejection_reason: reason ?? '' }).eq('id', id);
+    if (status === 'published') await ensureSeriesPublished(id);
     loadFilms();
   }
 
@@ -428,7 +447,7 @@ function FilmsTab() {
       admin_review_note: note ?? null,
       reviewed_at: new Date().toISOString(),
     }).eq('id', id);
-    if (reviewStatus === 'approved') await supabase.from('films').update({ status: 'published' }).eq('id', id);
+    if (reviewStatus === 'approved') { await supabase.from('films').update({ status: 'published' }).eq('id', id); await ensureSeriesPublished(id); }
     if (reviewStatus === 'removed') await supabase.from('films').update({ status: 'rejected' }).eq('id', id);
     setReviewingId(null);
     setReviewNote('');
